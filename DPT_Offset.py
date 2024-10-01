@@ -32,15 +32,16 @@ class DPT:
         self.jobs = []      # All possible jobs that can be in the DPT (except the root jobs)
         self.dbg = False    # Flag to print debug information
 
-        print("Chain: ")
-        for t in self.chain:
-            print(t)
+        if self.dbg:
+            print("Chain: ")
+            for t in self.chain:
+                print(t)
 
     def getRootJobs(self):
         """ Returns all root jobs of the chain. """
 
         rootTask = self.chain[0]
-        hp = hyperperiod(chain)
+        hp = hyperperiod(self.chain)
 
         return rootTask.getJobsUntil(hp)
 
@@ -48,7 +49,7 @@ class DPT:
         """ Davare et al. bound without response times. """
         davare = 0
 
-        for t in chain:
+        for t in self.chain:
             davare += (t.period + t.deadline)
 
         return davare
@@ -171,7 +172,7 @@ if __name__ == '__main__':
 
     dpt = DPT(chain)
     dpt.dbg = True
-    
+
     dpt.getDpt()
 
     print("Max Data Age = %s" % (printTime(dpt.maxAge)))

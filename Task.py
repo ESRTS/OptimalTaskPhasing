@@ -79,10 +79,7 @@ def isMaxHarmonic(tasks):
     """ Function returns true of the task set is max harmonic. I.e. the largest task period can be evenly divided by all other periods. """
 
     # Get the largest period in the task set
-    maxPeriod = 0
-    for t in tasks:
-        if t.period > maxPeriod:
-            maxPeriod = t.period
+    maxPeriod = getMaxPeriod(tasks)
 
     # Check if all periods evenly divide the largest task period
     for t in tasks:
@@ -90,6 +87,15 @@ def isMaxHarmonic(tasks):
             return False
 
     return True
+
+def getMaxPeriod(tasks):
+    """ Function returns the largest task period. """
+    maxPeriod = 0
+    for t in tasks:
+        if t.period > maxPeriod:
+            maxPeriod = t.period
+    
+    return maxPeriod
 
 def hyperperiod(tasks):
     """ Returns the hyperperiod of the taskset """
@@ -103,7 +109,7 @@ def hyperperiod(tasks):
 
 if __name__ == '__main__':
     """ Debugging """
-    #random.seed(123)
+    random.seed(123)
 
     task1 = Task('Task1', useconds(100), mseconds(100), mseconds(100), 0)
 
