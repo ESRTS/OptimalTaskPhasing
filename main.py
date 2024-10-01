@@ -1,7 +1,9 @@
 from Time import *
 from Task import Task
+from Task import hyperperiod
 from DPT_Offset import *
 from OptimalPhasing import *
+from plotting import *
 import random
 from timeit import default_timer as timer
 import os
@@ -10,18 +12,18 @@ def experimentMaxHarmonic(seed):
     print("Experiment: Max. Harmonic Chains")
 
     basePath = "output/expMaxHarmonic"
+    dstPath = "plots"
+
     os.makedirs(basePath, exist_ok=True)    # Create output folder if it does not exist
 
-    
-
-    expCount = 10  # Number of experiments for each configuration and data point
+    expCount = 100  # Number of experiments for each configuration and data point
 
     minChainLength = 2      # Minimum length of generated chains
     maxChainLength = 10     # Maximum length of generated chains
     stepChainLength = 1     # Step between two examined chain length
 
     for length in range(minChainLength, maxChainLength+1, stepChainLength): # Each chain length
-        print("Chain Length: ", length)
+        print("Chain Length: ", "%02d" % (length,), end =" ", flush=True)
 
         random.seed(seed)   # For reproducability we use the seed here for each chain length
 
@@ -34,39 +36,47 @@ def experimentMaxHarmonic(seed):
         with open(filePath, "a") as file:
             for i in range(1, expCount+1):                                        # Each experiment for the chain length
 
+                print(".", end =" ", flush=True)
+
                 # Generate a random chain of the given length with max harmonic periods. This is always needed for reproducable results!
                 maxHarmonic = False
                 while maxHarmonic is False:
                     chain = generateRandomTasks(length, 0.5)    # Utilization does not matter since we focus on LET
                     maxHarmonic = isMaxHarmonic(chain)          # Only keep max harmoic chains
 
+                hp = hyperperiod(chain)
+
                 if i > existingResults: # Only run the analysis if results don't exist yet
                     # DPT analysis 
                     startDpt = timer()
                     dpt = DPT(chain)
                     dpt.getDpt()
-                    synchronousLatency = dpt.maxAge
+                    synchronousLatency = dpt.maxAge / hp
                     durDpt = timer() - startDpt
 
                     # Optimal Phasing
                     startOpt = timer()
-                    optPhasingLatency = optimalPhasing(chain)
+                    optPhasingLatency = optimalPhasing(chain) / hp
                     durOpt = timer() - startOpt
 
                     # DPT analysis with phasing 
                     startDptOffset = timer()
                     dptOffset = DPT(chain)
                     dptOffset.getDpt()
-                    offsetLatency = dptOffset.maxAge
+                    offsetLatency = dptOffset.maxAge / hp
                     durDptOffset = timer() - startDptOffset
 
                     assert optPhasingLatency <= synchronousLatency
+                    assert optPhasingLatency >= offsetLatency
 
-                    file.write(str(i) + ',' + str(synchronousLatency) + ',' + "{:.6f}".format(durDpt) 
-                            + ',' + str(optPhasingLatency) + ',' + "{:.6f}".format(durOpt)
-                            + ',' + str(offsetLatency) + ',' + "{:.6f}".format(durDptOffset) + '\n')
+                    file.write(str(i) + ',' + "{:.6f}".format(synchronousLatency) + ',' + "{:.6f}".format(durDpt) 
+                            + ',' + "{:.6f}".format(optPhasingLatency) + ',' + "{:.6f}".format(durOpt)
+                            + ',' + "{:.6f}".format(offsetLatency) + ',' + "{:.6f}".format(durDptOffset) + '\n')
             file.close()
-                
+            print(" ")
+
+    os.makedirs(dstPath, exist_ok=True)    # Create plots folder if it does not exist   
+    plot(basePath, dstPath, minChainLength, maxChainLength, stepChainLength)
 
 
 def main():

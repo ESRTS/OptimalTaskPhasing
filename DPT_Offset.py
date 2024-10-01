@@ -124,7 +124,7 @@ class DPT:
         for readJob in taskJobs:
             if readJob.ri[1] >= writeJob.di[0] and readJob.ri[0] < writeJob.di[1]:  # Eq. 1 Becker RTCSA'16
                 successors.append(readJob)
-
+        
         return successors
 
     def printNode(self, node):
@@ -149,14 +149,14 @@ class DptJob:
 
     def resetIntervals(self):
         """ Reset the read and data intervals (after they have been modified during the graph build). """
-        self.ri = [self.job.release, self.job.deadline - self.job.task.wcet]                       # The read interval of the job (i.e. when data might be read). 
-        self.di = [self.job.release + self.job.task.wcet, self.job.deadline + self.job.task.period]     # The data interval of the job (i.e. when data produced can be available).
+        self.ri = [self.job.release, self.job.release]                                                          # The read interval of the job (i.e. when data might be read). 
+        self.di = [self.job.release + self.job.task.period, self.job.release + (2 * self.job.task.period)]      # The data interval of the job (i.e. when data produced can be available).
 
     def __str__(self):
         if not self.branchAge is None:
-            return str(self.job) + "RI=[%s, %s] DI=[%s, %s) -> Age=%s" % (printTime(self.ri[0]), printTime(self.ri[1]), printTime(self.di[0]), printTime(self.di[1]), printTime(self.branchAge))
+            return str(self.job) + " RI=[%s, %s] DI=[%s, %s) -> Age=%s" % (printTime(self.ri[0]), printTime(self.ri[1]), printTime(self.di[0]), printTime(self.di[1]), printTime(self.branchAge))
         else:
-            return str(self.job) + "RI=[%s, %s] DI=[%s, %s)" % (printTime(self.ri[0]), printTime(self.ri[1]), printTime(self.di[0]), printTime(self.di[1]))
+            return str(self.job) + " RI=[%s, %s] DI=[%s, %s)" % (printTime(self.ri[0]), printTime(self.ri[1]), printTime(self.di[0]), printTime(self.di[1]))
 
     __repr__ = __str__
 
@@ -172,7 +172,6 @@ if __name__ == '__main__':
 
     dpt = DPT(chain)
     dpt.dbg = True
-
     dpt.getDpt()
 
     print("Max Data Age = %s" % (printTime(dpt.maxAge)))
