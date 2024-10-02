@@ -3,7 +3,8 @@
 # 
 # Author: Matthias Becker
 ##################################################################################
-#import pandas as pd
+import seaborn as sns
+import pandas as pd
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
@@ -43,30 +44,34 @@ def configure_mpl_for_tex():
     }
     mpl.rcParams.update(settings)
 
-def readData(dataFolder, length):
-
-    # Syncronous release DPT analysis
-    syncLatency = []
-    syncDur = []
-    # Optimal phasing and analysis
-    optLatency = []
-    optDur = []
-    # Offsets and DPT analysis
-    offsetLatency = []
-    offsetDur = []
+def readDataFrameIndividual(dataFolder, length):
+    """ Reads the data for individual appraoches. """
+    outputData = []
 
     filename = dataFolder + "/length_" + str(length) + ".csv"
     with open(filename,'r') as csvfile: 
         data = csv.reader(csvfile, delimiter = ',') 
         for row in data: 
-            syncLatency.append(float((row[1])))
-            syncDur.append(float((row[2])))
-            optLatency.append(float(row[3]))
-            optDur.append(float(row[4]))
-            offsetLatency.append(float(row[5]))
-            offsetDur.append(float(row[6]))
+            outputData.append(['Worst-Case Phasing', length, float((row[7])), float((row[8]))])
+            outputData.append(['Syncronous Release', length, float((row[1])), float((row[2]))])
+            outputData.append(['Optimal Phasing', length, float((row[3])), float((row[4]))])
+            #outputData.append(['OFFSET_EXP', length, float((row[5])), float((row[6]))])
+            
+            assert row[3] == row[5]
     
-    return [syncLatency, syncDur, optLatency, optDur, offsetLatency, offsetDur]
+    return outputData
+
+def readDataFrameRatio(dataFolder, length):
+
+    outputData = []
+
+    filename = dataFolder + "/length_" + str(length) + ".csv"
+    with open(filename,'r') as csvfile: 
+        data = csv.reader(csvfile, delimiter = ',') 
+        for row in data: 
+            outputData.append(['Improvement', length, float((row[3])) / float((row[1]))])
+    
+    return outputData
 
 def plot(dataFolder, dstFolder, start, stop, step):
     """ Create plotw for the files in the dataFolder. """
@@ -74,28 +79,69 @@ def plot(dataFolder, dstFolder, start, stop, step):
     
     print("Generating Plots for data " + expName)
 
-    # Syncronous release DPT analysis
-    syncLatency = []
-    syncDur = []
-    # Optimal phasing and analysis
-    optLatency = []
-    optDur = []
-    # Offsets and DPT analysis
-    offsetLatency = []
-    offsetDur = []
+    data = []
 
     for length in range(start, stop+1, step):   # Read data from CSV files. 
-        data = readData(dataFolder, length)
+        data.extend(readDataFrameIndividual(dataFolder, length))
 
-        syncLatency.append(data[0])
-        syncDur.append(data[1])
-        optLatency.append(data[2])
-        optDur.append(data[3])
-        offsetLatency.append(data[4])
-        offsetDur.append(data[5])
+    df = pd.DataFrame(data, columns=['Approach', 'Chain Length', 'Latency [HP]', 'Computation Time [s]'])
 
-    plt.close()
+    ######################################################################################################
+    # BOXPLOT comparing latency of sync approach to optimal phasing
+    ######################################################################################################
     configure_mpl_for_tex()
 
-    plt.xlabel('Chain Length')
-    plt.ylabel('Norm. Latency')
+    plt = sns.boxplot(x = df['Chain Length'],
+            y = df['Latency [HP]'],
+            hue = df['Approach'], fliersize=2, linewidth=1, palette='Set2')
+    #plt.set_yscale("log")
+   
+    plt.legend(loc="upper left")
+    #plt.set(ylim=(0, 2))
+    
+    plt.figure.savefig(dstFolder + "/LatencyComp.pdf", bbox_inches='tight')
+    
+    plt.cla()
+
+    ######################################################################################################
+    # BOXPLOT comparing analysis time of different approaches
+    ######################################################################################################
+    configure_mpl_for_tex()
+
+    plt = sns.boxplot(x = df['Chain Length'],
+            y = df['Computation Time [s]'],
+            hue = df['Approach'], fliersize=2, linewidth=1, palette='Set2')
+    plt.set_yscale("log")
+   
+    plt.legend(ncol=2, loc="upper left")
+    plt.set(ylim=(0, 10))
+    
+    plt.figure.savefig(dstFolder + "/AnalysisTimeComp.pdf", bbox_inches='tight')
+    
+    plt.cla()
+
+    ######################################################################################################
+    # BOXPLOT comparing ratio between latency of sync approach and optimal phasing (opt / sync)
+    ######################################################################################################
+
+    data = []
+
+    for length in range(start, stop+1, step):   # Read data from CSV files. 
+        data.extend(readDataFrameRatio(dataFolder, length))
+
+    df = pd.DataFrame(data, columns=['Approach', 'Chain Length', 'Optimal / Syncronous'])
+
+    configure_mpl_for_tex()
+
+    plt = sns.boxplot(x = df['Chain Length'],
+            y = df['Optimal / Syncronous'],
+            hue = df['Approach'], fliersize=2, linewidth=1, palette='Set2')
+    #plt.set_yscale("log")
+   
+    plt.get_legend().remove()
+    #plt.legend(ncol=2, loc="upper left")
+    #plt.set(ylim=(0, 2))
+    
+    plt.figure.savefig(dstFolder + "/LatencyReduction.pdf", bbox_inches='tight')
+    
+    plt.cla()

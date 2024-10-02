@@ -3,6 +3,7 @@ from Task import Task
 from Task import hyperperiod
 from DPT_Offset import *
 from OptimalPhasing import *
+from Davare import *
 from plotting import *
 import random
 from timeit import default_timer as timer
@@ -34,9 +35,14 @@ def experimentMaxHarmonic(seed):
             existingResults = sum(1 for _ in open(filePath))    # Get the number of results that alredy exist
 
         with open(filePath, "a") as file:
+
+            bestRatio = 1000000
+            worstRatio = 0
+
             for i in range(1, expCount+1):                                        # Each experiment for the chain length
 
-                print(".", end =" ", flush=True)
+                if i % 2 == 0:
+                    print(".", end =" ", flush=True)
 
                 # Generate a random chain of the given length with max harmonic periods. This is always needed for reproducable results!
                 maxHarmonic = False
@@ -66,14 +72,27 @@ def experimentMaxHarmonic(seed):
                     offsetLatency = dptOffset.maxAge / hp
                     durDptOffset = timer() - startDptOffset
 
+                    # Davare bound, i.e. worst-case phasing
+                    startDavare = timer()
+                    davareLatency = davareBound(chain) / hp
+                    durDavare = timer() - startDavare
+
                     assert optPhasingLatency <= synchronousLatency
                     assert optPhasingLatency >= offsetLatency
 
+                    ratio = optPhasingLatency / synchronousLatency 
+                    if ratio < bestRatio:
+                        bestRatio = ratio
+
+                    if ratio > worstRatio:
+                        worstRatio = ratio
+
                     file.write(str(i) + ',' + "{:.6f}".format(synchronousLatency) + ',' + "{:.6f}".format(durDpt) 
                             + ',' + "{:.6f}".format(optPhasingLatency) + ',' + "{:.6f}".format(durOpt)
-                            + ',' + "{:.6f}".format(offsetLatency) + ',' + "{:.6f}".format(durDptOffset) + '\n')
+                            + ',' + "{:.6f}".format(offsetLatency) + ',' + "{:.6f}".format(durDptOffset)
+                            + ',' + "{:.6f}".format(davareLatency) + ',' + "{:.6f}".format(durDavare) + '\n')
             file.close()
-            print(" ")
+            print(" -> Best: " + str(bestRatio) + " Worst: " + str(worstRatio))
 
     os.makedirs(dstPath, exist_ok=True)    # Create plots folder if it does not exist   
     plot(basePath, dstPath, minChainLength, maxChainLength, stepChainLength)
