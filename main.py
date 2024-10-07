@@ -3,7 +3,7 @@ from Task import Task
 from Task import hyperperiod
 from DPT_Offset import *
 from OptimalPhasing import *
-from Davare import *
+from Comparison import *
 from plotting import *
 import random
 from timeit import default_timer as timer
@@ -17,7 +17,7 @@ def experimentMaxHarmonic(seed):
 
     os.makedirs(basePath, exist_ok=True)    # Create output folder if it does not exist
 
-    expCount = 100  # Number of experiments for each configuration and data point
+    expCount = 50  # Number of experiments for each configuration and data point
 
     minChainLength = 2      # Minimum length of generated chains
     maxChainLength = 10     # Maximum length of generated chains
@@ -77,6 +77,14 @@ def experimentMaxHarmonic(seed):
                     davareLatency = davareBound(chain) / hp
                     durDavare = timer() - startDavare
 
+                    # Random phasing between tasks
+                    startRandomPhasing = timer()
+                    randomPhasing(chain, seed)
+                    rndPhasingDpt = DPT(chain)
+                    rndPhasingDpt.getDpt()
+                    rndPhasingLatency = rndPhasingDpt.maxAge / hp
+                    durRandomPhasing = timer() - startRandomPhasing
+
                     assert optPhasingLatency <= synchronousLatency
                     assert optPhasingLatency >= offsetLatency
 
@@ -87,10 +95,13 @@ def experimentMaxHarmonic(seed):
                     if ratio > worstRatio:
                         worstRatio = ratio
 
-                    file.write(str(i) + ',' + "{:.6f}".format(synchronousLatency) + ',' + "{:.6f}".format(durDpt) 
-                            + ',' + "{:.6f}".format(optPhasingLatency) + ',' + "{:.6f}".format(durOpt)
-                            + ',' + "{:.6f}".format(offsetLatency) + ',' + "{:.6f}".format(durDptOffset)
-                            + ',' + "{:.6f}".format(davareLatency) + ',' + "{:.6f}".format(durDavare) + '\n')
+                    file.write(str(i) + ',' + "{:.6f}".format(synchronousLatency) + ',' + "{:.6f}".format(durDpt) + ',' 
+                               + "{:.6f}".format(optPhasingLatency) + ',' + "{:.6f}".format(durOpt) + ',' 
+                               + "{:.6f}".format(offsetLatency) + ',' + "{:.6f}".format(durDptOffset) + ',' 
+                               + "{:.6f}".format(davareLatency) + ',' + "{:.6f}".format(durDavare) + ',' 
+                               + "{:.6f}".format(rndPhasingLatency) + ',' + "{:.6f}".format(durRandomPhasing) + '\n')
+
+                    
             file.close()
             print(" -> Best: " + str(bestRatio) + " Worst: " + str(worstRatio))
 
