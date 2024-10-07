@@ -17,10 +17,10 @@ def experimentMaxHarmonic(seed):
 
     os.makedirs(basePath, exist_ok=True)    # Create output folder if it does not exist
 
-    expCount = 50  # Number of experiments for each configuration and data point
+    expCount = 200  # Number of experiments for each configuration and data point
 
     minChainLength = 2      # Minimum length of generated chains
-    maxChainLength = 10     # Maximum length of generated chains
+    maxChainLength = 15     # Maximum length of generated chains
     stepChainLength = 1     # Step between two examined chain length
 
     for length in range(minChainLength, maxChainLength+1, stepChainLength): # Each chain length
@@ -85,6 +85,9 @@ def experimentMaxHarmonic(seed):
                     rndPhasingLatency = rndPhasingDpt.maxAge / hp
                     durRandomPhasing = timer() - startRandomPhasing
 
+                    # Offset Heuristic
+                    numAssignments = offsetAssignmentHeuristic(chain, mseconds(1))
+
                     assert optPhasingLatency <= synchronousLatency
                     assert optPhasingLatency >= offsetLatency
 
@@ -99,7 +102,8 @@ def experimentMaxHarmonic(seed):
                                + "{:.6f}".format(optPhasingLatency) + ',' + "{:.6f}".format(durOpt) + ',' 
                                + "{:.6f}".format(offsetLatency) + ',' + "{:.6f}".format(durDptOffset) + ',' 
                                + "{:.6f}".format(davareLatency) + ',' + "{:.6f}".format(durDavare) + ',' 
-                               + "{:.6f}".format(rndPhasingLatency) + ',' + "{:.6f}".format(durRandomPhasing) + '\n')
+                               + "{:.6f}".format(rndPhasingLatency) + ',' + "{:.6f}".format(durRandomPhasing) + ','
+                               + str(numAssignments) + '\n')
 
                     
             file.close()

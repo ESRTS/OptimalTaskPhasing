@@ -73,6 +73,19 @@ def readDataFrameRatio(dataFolder, length):
     
     return outputData
 
+def readOffsetHeuristicData(dataFolder, start, stop, step):
+
+    outputData = []
+
+    for length in range(start, stop+1, step):   # Read data from CSV files.
+        filename = dataFolder + "/length_" + str(length) + ".csv"
+        with open(filename,'r') as csvfile: 
+            data = csv.reader(csvfile, delimiter = ',') 
+            for row in data: 
+                outputData.append(['Heuristic', length, int(row[11])])
+    
+    return outputData
+
 def readAverageValues(dataFolder, start, stop, step):
 
     outputData = []
@@ -100,7 +113,7 @@ def readAverageValues(dataFolder, start, stop, step):
         avrgOpt = avrgOpt / count
         avrgWorst = avrgWorst / count
         avrgRnd = avrgRnd / count
-        
+
         outputData.append(['Worst-Case Phasing', avrgWorst, length])
         outputData.append(['Syncronous Release', avrgSync, length])
         outputData.append(['Optimal Phasing', avrgOpt, length])
@@ -142,13 +155,16 @@ def plot(dataFolder, dstFolder, start, stop, step):
     ######################################################################################################
     configure_mpl_for_tex()
 
+    indexAge = df[ (df['Approach'] == 'Random Phasing') ].index
+    df.drop(indexAge , inplace=True)
+
     plt = sns.boxplot(x = df['Chain Length'],
             y = df['Computation Time [s]'],
             hue = df['Approach'], fliersize=2, linewidth=1, palette='Set2')
     plt.set_yscale("log")
    
     plt.legend(ncol=2, loc="upper left")
-    plt.set(ylim=(0, 10))
+    plt.set(ylim=(0, 100))
     
     plt.figure.savefig(dstFolder + "/AnalysisTimeComp.pdf", bbox_inches='tight')
     
@@ -194,5 +210,30 @@ def plot(dataFolder, dstFolder, start, stop, step):
     g.legend_.set_title(None)
 
     plt.figure.savefig(dstFolder + "/AvrgLatencyComp.pdf", bbox_inches='tight')
+    
+    plt.cla()
+
+    ######################################################################################################
+    # Boxplot for the phasing combinations to check by the heuristic of Martinez et al.
+    ######################################################################################################
+
+    data = readOffsetHeuristicData(dataFolder, start, stop, step)
+
+    df = pd.DataFrame(data, columns=['Approach', 'Chain Length', 'Phase Combinations'])
+
+    print(df)
+
+    configure_mpl_for_tex()
+
+    plt = sns.boxplot(x = df['Chain Length'],
+            y = df['Phase Combinations'],
+            hue = df['Approach'], fliersize=2, linewidth=1, palette='Set2')
+    plt.set_yscale("log")
+   
+    plt.get_legend().remove()
+    #plt.legend(ncol=2, loc="upper left")
+    #plt.set(ylim=(0, 2))
+    
+    plt.figure.savefig(dstFolder + "/HeuristicCombinations.pdf", bbox_inches='tight')
     
     plt.cla()
