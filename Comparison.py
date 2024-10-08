@@ -44,32 +44,52 @@ def offsetAssignmentHeuristic(chain, offsetGranularity):
         Design of Integrated Circuits and Systems, vol. 37, no. 11, pp. 2244-2254, 2018.
     """
 
-    combinations = 1    # how often the latency analysis needs to be performed
+    ### Compute combinations based on offset range to check as described in paper ###
+
+    combinationsIndividual = 1    # how often the latency analysis needs to be performed
 
     periods = []
 
     for task in chain:
-        if len(periods) == 0:
-            periods.append(task.period)
-        else:
+
+        assert task.period % offsetGranularity == 0
+
+        tmpPeriod = int(task.period / offsetGranularity)
+
+        if len(periods) != 0:
             periodsLcm = math.lcm(*periods)
-            offsetMax = math.gcd(task.period, periodsLcm) 
+            offsetMax = math.gcd(tmpPeriod, periodsLcm) 
+            combinationsIndividual = int(combinationsIndividual * offsetMax)
+        periods.append(tmpPeriod)
 
-            assert offsetMax % offsetGranularity == 0
+    ### Compute combinations from complexity as described in paper ###
 
-            combinations = int(combinations * (offsetMax / offsetGranularity))
-    
-    #assert countLatencyTest % offsetGranularity = 0
+    prod = 1
 
-    return combinations
+    for task in chain:
+
+        assert task.period % offsetGranularity == 0
+
+        prod = prod * (task.period / offsetGranularity)
+
+    hp = hyperperiod(chain) / offsetGranularity
+
+    combinations = int(prod / hp)
+
+    ### Make sure both versions result in the same number of combinations to check ###
+    if combinations != combinationsIndividual:
+        print("now")
+    assert combinations == combinationsIndividual
+
+    return combinations 
 
 if __name__ == "__main__":
     """ Debugging """
     os.system('cls' if os.name == 'nt' else 'clear')    # Clear the terminal
 
-    task1 = Task('Task1', useconds(1), mseconds(10), mseconds(10), 0)
-    task2 = Task('Task2', useconds(1), mseconds(1), mseconds(1), 0)
-    task3 = Task('Task3', useconds(1), mseconds(10), mseconds(10), mseconds(1))
+    task1 = Task('Task1', useconds(1), mseconds(5), mseconds(5), 0)
+    task2 = Task('Task2', useconds(1), mseconds(2), mseconds(2), 0)
+    task3 = Task('Task3', useconds(1), mseconds(200), mseconds(200), mseconds(1))
 
     chain = [task1, task2, task3]
 

@@ -10,18 +10,28 @@ from timeit import default_timer as timer
 import os
 
 def experimentMaxHarmonic(seed):
+    """
+    This function executes the experiments with cause-effect chains that have max-harmonic periods. 
+    The chain length is varied from minChainLength to maxChainLength, and for each setting expCount random chains are examined.
+    """
+
     print("Experiment: Max. Harmonic Chains")
 
-    basePath = "output/expMaxHarmonic"
-    dstPath = "plots"
+    # Paths to write files to
+    basePath = "output/expMaxHarmonic"      # Experiment data is stored here
+    dstPath = "plots"                       # Final plots are stored here
+
+    # Experiment Configuration
+    expCount = 50                           # Number of experiments for each configuration and data point
+    minChainLength = 2                      # Minimum length of generated chains
+    maxChainLength = 10                     # Maximum length of generated chains
+    stepChainLength = 1                     # Step between two examined chain length
+
+    # Configuration for the crude progress bar (no need to change, only visual effect. No effect on experiment itself)
+    progressDotsMax = 50                    # Config for the length of the crude progress bar
+    expPerDot = math.floor(expCount / progressDotsMax)
 
     os.makedirs(basePath, exist_ok=True)    # Create output folder if it does not exist
-
-    expCount = 200  # Number of experiments for each configuration and data point
-
-    minChainLength = 2      # Minimum length of generated chains
-    maxChainLength = 15     # Maximum length of generated chains
-    stepChainLength = 1     # Step between two examined chain length
 
     for length in range(minChainLength, maxChainLength+1, stepChainLength): # Each chain length
         print("Chain Length: ", "%02d" % (length,), end =" ", flush=True)
@@ -30,6 +40,7 @@ def experimentMaxHarmonic(seed):
 
         existingResults = 0
 
+        # In case the previous experiment was stopped, check how many systems have been processed and contiue from there
         filePath = basePath + '/length_' + str(length) + '.csv'
         if os.path.isfile(filePath) is True:
             existingResults = sum(1 for _ in open(filePath))    # Get the number of results that alredy exist
@@ -39,9 +50,9 @@ def experimentMaxHarmonic(seed):
             bestRatio = 1000000
             worstRatio = 0
 
-            for i in range(1, expCount+1):                                        # Each experiment for the chain length
+            for i in range(1, expCount+1):                      # Each experiment for the chain length
 
-                if i % 2 == 0:
+                if i % expPerDot == 0:                          # This is only to plot some crude progress bar
                     print(".", end =" ", flush=True)
 
                 # Generate a random chain of the given length with max harmonic periods. This is always needed for reproducable results!
@@ -52,7 +63,7 @@ def experimentMaxHarmonic(seed):
 
                 hp = hyperperiod(chain)
 
-                if i > existingResults: # Only run the analysis if results don't exist yet
+                if i > existingResults:                         # Only run the analysis if results don't exist yet
                     # DPT analysis 
                     startDpt = timer()
                     dpt = DPT(chain)
@@ -104,10 +115,9 @@ def experimentMaxHarmonic(seed):
                                + "{:.6f}".format(davareLatency) + ',' + "{:.6f}".format(durDavare) + ',' 
                                + "{:.6f}".format(rndPhasingLatency) + ',' + "{:.6f}".format(durRandomPhasing) + ','
                                + str(numAssignments) + '\n')
-
                     
             file.close()
-            print(" -> Best: " + str(bestRatio) + " Worst: " + str(worstRatio))
+            print(" -> Best: " + "{:.4f}".format(bestRatio) + " Worst: " + "{:.4f}".format(worstRatio))
 
     os.makedirs(dstPath, exist_ok=True)    # Create plots folder if it does not exist   
     plot(basePath, dstPath, minChainLength, maxChainLength, stepChainLength)

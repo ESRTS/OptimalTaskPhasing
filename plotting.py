@@ -221,8 +221,6 @@ def plot(dataFolder, dstFolder, start, stop, step):
 
     df = pd.DataFrame(data, columns=['Approach', 'Chain Length', 'Phase Combinations'])
 
-    print(df)
-
     configure_mpl_for_tex()
 
     plt = sns.boxplot(x = df['Chain Length'],
