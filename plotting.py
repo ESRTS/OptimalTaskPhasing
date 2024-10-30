@@ -120,6 +120,42 @@ def readAverageValues(dataFolder, start, stop, step):
         outputData.append(['Random Phasing', avrgRnd, length])
     return outputData
 
+def geo_mean(iterable):
+    a = np.array(iterable)
+    return a.prod()**(1.0/len(a))
+
+def readAverageValuesGeometric(dataFolder, start, stop, step):
+
+    outputData = []
+
+    for length in range(start, stop+1, step):   # Read data from CSV files. 
+
+        filename = dataFolder + "/length_" + str(length) + ".csv"
+
+        sync = []
+        opt = []
+        worst = []
+        rnd = []
+
+        with open(filename,'r') as csvfile: 
+            data = csv.reader(csvfile, delimiter = ',') 
+            for row in data: 
+                sync.append(float((row[1])))
+                opt.append(float((row[3])))
+                worst.append(float((row[7])))
+                rnd.append(float((row[9])))
+        
+        avrgSync = geo_mean(sync)
+        avrgOpt = geo_mean(opt)
+        avrgWorst = geo_mean(worst)
+        avrgRnd = geo_mean(rnd)
+
+        outputData.append(['Worst-Case Phasing', avrgWorst, length])
+        outputData.append(['Syncronous Release', avrgSync, length])
+        outputData.append(['Optimal Phasing', avrgOpt, length])
+        outputData.append(['Random Phasing', avrgRnd, length])
+    return outputData
+
 def plot(dataFolder, dstFolder, start, stop, step):
     """ Create plotw for the files in the dataFolder. """
     expName = dataFolder.split('/')[-1]
@@ -131,7 +167,7 @@ def plot(dataFolder, dstFolder, start, stop, step):
     for length in range(start, stop+1, step):   # Read data from CSV files. 
         data.extend(readDataFrameIndividual(dataFolder, length))
 
-    df = pd.DataFrame(data, columns=['Approach', 'Chain Length', 'Latency [HP]', 'Computation Time [s]'])
+    df = pd.DataFrame(data, columns=['Approach', 'Chain Length', 'Latency [$H$]', 'Computation Time [s]'])
 
     ######################################################################################################
     # BOXPLOT comparing latency of sync approach to optimal phasing
@@ -139,7 +175,7 @@ def plot(dataFolder, dstFolder, start, stop, step):
     configure_mpl_for_tex()
 
     plt = sns.boxplot(x = df['Chain Length'],
-            y = df['Latency [HP]'],
+            y = df['Latency [$H$]'],
             hue = df['Approach'], fliersize=2, linewidth=1, palette='Set2')
     #plt.set_yscale("log")
    
@@ -164,8 +200,8 @@ def plot(dataFolder, dstFolder, start, stop, step):
     plt.set_yscale("log")
    
     plt.legend(ncol=2, loc="upper left")
-    plt.set(ylim=(0, 100))
-    
+    plt.set_ylim(top=100)
+
     plt.figure.savefig(dstFolder + "/AnalysisTimeComp.pdf", bbox_inches='tight')
     
     plt.cla()
@@ -200,12 +236,13 @@ def plot(dataFolder, dstFolder, start, stop, step):
     # Lineplot comparing different latency values
     ######################################################################################################
     
-    data = readAverageValues(dataFolder, start, stop, step)
-
-    df = pd.DataFrame(data, columns=['Approach', 'Average Latency [HP]', 'Chain Length'])
+    #data = readAverageValues(dataFolder, start, stop, step)
+    data = readAverageValuesGeometric(dataFolder, start, stop, step)
+   
+    df = pd.DataFrame(data, columns=['Approach', 'Average Latency [$H$]', 'Chain Length'])
 
     configure_mpl_for_tex()
-    g = sns.lineplot(data = df, x = 'Chain Length', y = 'Average Latency [HP]', hue='Approach', palette='Set2')
+    g = sns.lineplot(data = df, x = 'Chain Length', y = 'Average Latency [$H$]', hue='Approach', palette='Set2')
 
     g.legend_.set_title(None)
 

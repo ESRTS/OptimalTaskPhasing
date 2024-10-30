@@ -97,6 +97,21 @@ def getMaxPeriod(tasks):
     
     return maxPeriod
 
+def getMax2Period(tasks):
+    """ Function returns the second largest period (or 0). """
+    max1Period = 0
+    max2Period = 0
+
+    for t in tasks:
+        if t.period > max1Period:
+            max2Period = max1Period
+            max1Period = t.period
+        elif t.period < max1Period:
+            if t.period > max2Period:
+                max2Period = t.period
+    
+    return max2Period
+
 def hyperperiod(tasks):
     """ Returns the hyperperiod of the taskset """
     periods = []

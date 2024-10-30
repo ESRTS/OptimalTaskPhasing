@@ -5,10 +5,9 @@ import os
 
 def davareBound(chain):
     """ This function computes the worst-case bound for the task chain.
-
-        Davare, Zhu, Di Natale, Pinello, Kanajan, and Sangiovanni-Vincentelli. 2007. 
+        Davare, Zhu, Di Natale, Pinello, Kanajan, and Sangiovanni-Vincentelli. 
         Period optimization for hard real-time distributed automotive systems. 
-        In Proceedings of the 44th annual Design Automation Conference (DAC '07). 
+        In Proceedings of the 44th annual Design Automation Conference (DAC), 2007. 
     """
     
     bound = 0

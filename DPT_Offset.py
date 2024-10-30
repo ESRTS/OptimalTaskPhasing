@@ -175,3 +175,16 @@ if __name__ == '__main__':
     dpt.getDpt()
 
     print("Max Data Age = %s" % (printTime(dpt.maxAge)))
+
+    task1 = Task('Task1', useconds(1), mseconds(10), mseconds(10), 0)
+    task2 = Task('Task2', useconds(1), mseconds(50), mseconds(50), 0)
+    task3 = Task('Task3', useconds(1), mseconds(10), mseconds(10), 0)
+    task4 = Task('Task4', useconds(1), mseconds(50), mseconds(50), 0)
+
+    chain = [task1, task2, task3, task4]
+
+    dpt = DPT(chain)
+    dpt.dbg = True
+    dpt.getDpt()
+
+    print("Max Data Age = %s" % (printTime(dpt.maxAge)))

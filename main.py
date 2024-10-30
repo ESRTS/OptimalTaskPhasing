@@ -1,5 +1,4 @@
 from Time import *
-from Task import Task
 from Task import hyperperiod
 from DPT_Offset import *
 from OptimalPhasing import *
@@ -9,23 +8,30 @@ import random
 from timeit import default_timer as timer
 import os
 
-def experimentMaxHarmonic(seed):
+def experiments(seed, onlyMaxHarmonic):
     """
-    This function executes the experiments with cause-effect chains that have max-harmonic periods. 
+    This function executes the experiments with cause-effect chains that have automotive periods. 
     The chain length is varied from minChainLength to maxChainLength, and for each setting expCount random chains are examined.
     """
 
-    print("Experiment: Max. Harmonic Chains")
+    if onlyMaxHarmonic:
+        print("Experiment: Max. Harmonic Chains")
+        
+        # Paths to write files to
+        basePath = "output/expMaxHarmonic"      # Experiment data is stored here
+        dstPath = "plots/maxHarmonic"           # Final plots are stored here
+    else:
+        print("Experiment: Semi Harmonic Chains")
 
-    # Paths to write files to
-    basePath = "output/expMaxHarmonic"      # Experiment data is stored here
-    dstPath = "plots"                       # Final plots are stored here
-
+        # Paths to write files to
+        basePath = "output/expSemiHarmonic"     # Experiment data is stored here
+        dstPath = "plots/semiHarmonic"          # Final plots are stored here
+    
     # Experiment Configuration
-    expCount = 50                           # Number of experiments for each configuration and data point
-    minChainLength = 2                      # Minimum length of generated chains
-    maxChainLength = 10                     # Maximum length of generated chains
-    stepChainLength = 1                     # Step between two examined chain length
+    expCount = 50                               # Number of experiments for each configuration and data point
+    minChainLength = 2                          # Minimum length of generated chains
+    maxChainLength = 10                         # Maximum length of generated chains
+    stepChainLength = 1                         # Step between two examined chain length
 
     # Configuration for the crude progress bar (no need to change, only visual effect. No effect on experiment itself)
     progressDotsMax = 50                    # Config for the length of the crude progress bar
@@ -56,39 +62,58 @@ def experimentMaxHarmonic(seed):
                     print(".", end =" ", flush=True)
 
                 # Generate a random chain of the given length with max harmonic periods. This is always needed for reproducable results!
-                maxHarmonic = False
-                while maxHarmonic is False:
+                if onlyMaxHarmonic == True:
+                    maxHarmonic = False
+                    while maxHarmonic is False:
+                        chain = generateRandomTasks(length, 0.5)    # Utilization does not matter since we focus on LET
+                        maxHarmonic = isMaxHarmonic(chain)          # Only keep max harmoic chains
+                else:
                     chain = generateRandomTasks(length, 0.5)    # Utilization does not matter since we focus on LET
-                    maxHarmonic = isMaxHarmonic(chain)          # Only keep max harmoic chains
+                    maxHarmonic = isMaxHarmonic(chain)
 
                 hp = hyperperiod(chain)
 
                 if i > existingResults:                         # Only run the analysis if results don't exist yet
+                    #############################
                     # DPT analysis 
+                    #############################
                     startDpt = timer()
                     dpt = DPT(chain)
                     dpt.getDpt()
                     synchronousLatency = dpt.maxAge / hp
                     durDpt = timer() - startDpt
 
+                    #############################
                     # Optimal Phasing
-                    startOpt = timer()
-                    optPhasingLatency = optimalPhasing(chain) / hp
-                    durOpt = timer() - startOpt
+                    #############################
+                    if maxHarmonic:
+                        startOpt = timer()
+                        optPhasingLatency = optimalPhasingMaxHarm(chain) / hp
+                        durOpt = timer() - startOpt
+                    else:
+                        startOpt = timer()
+                        optPhasingLatency = optimalPhasingSemiHarm(chain) / hp
+                        durOpt = timer() - startOpt
 
+                    #############################
                     # DPT analysis with phasing 
+                    #############################
                     startDptOffset = timer()
                     dptOffset = DPT(chain)
                     dptOffset.getDpt()
                     offsetLatency = dptOffset.maxAge / hp
                     durDptOffset = timer() - startDptOffset
 
+                    #############################
                     # Davare bound, i.e. worst-case phasing
+                    #############################
                     startDavare = timer()
                     davareLatency = davareBound(chain) / hp
                     durDavare = timer() - startDavare
 
+                    #############################
                     # Random phasing between tasks
+                    #############################
                     startRandomPhasing = timer()
                     randomPhasing(chain, seed)
                     rndPhasingDpt = DPT(chain)
@@ -96,11 +121,19 @@ def experimentMaxHarmonic(seed):
                     rndPhasingLatency = rndPhasingDpt.maxAge / hp
                     durRandomPhasing = timer() - startRandomPhasing
 
+                    #############################
                     # Offset Heuristic
                     numAssignments = offsetAssignmentHeuristic(chain, mseconds(1))
+                    #############################
 
+                    # Make sure the optimal phasing is always smaller or equal than the synchronous release
                     assert optPhasingLatency <= synchronousLatency
-                    assert optPhasingLatency >= offsetLatency
+
+                    # Make sure the optimal phasing is always smaller or equal than the random phasing
+                    assert optPhasingLatency <= rndPhasingLatency
+
+                    # Make sure that the latency we compute with the proposed phasing is always equal to the exact analysis
+                    assert optPhasingLatency == offsetLatency
 
                     ratio = optPhasingLatency / synchronousLatency 
                     if ratio < bestRatio:
@@ -114,7 +147,7 @@ def experimentMaxHarmonic(seed):
                                + "{:.6f}".format(offsetLatency) + ',' + "{:.6f}".format(durDptOffset) + ',' 
                                + "{:.6f}".format(davareLatency) + ',' + "{:.6f}".format(durDavare) + ',' 
                                + "{:.6f}".format(rndPhasingLatency) + ',' + "{:.6f}".format(durRandomPhasing) + ','
-                               + str(numAssignments) + '\n')
+                               + str(numAssignments) + ',' + str(maxHarmonic) + '\n')
                     
             file.close()
             print(" -> Best: " + "{:.4f}".format(bestRatio) + " Worst: " + "{:.4f}".format(worstRatio))
@@ -125,7 +158,8 @@ def experimentMaxHarmonic(seed):
 
 def main():
 
-    experimentMaxHarmonic(123)
+    onlyMaxHarmonic = False  # Set this flag to false to keep also chains that are not max-harmonic
+    experiments(123, onlyMaxHarmonic)
 
 if __name__ == "__main__":
     main()
