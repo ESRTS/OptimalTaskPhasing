@@ -126,7 +126,7 @@ def chainString(chain):
     retval = str(chain[0].period)
 
     for task in chain[1:]:
-        retval = retval + ' -> ' + str(task.period)
+        retval = retval + ' -> ' + printTime(task.period)
 
     return retval
 
