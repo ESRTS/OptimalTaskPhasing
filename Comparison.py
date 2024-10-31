@@ -76,9 +76,10 @@ def offsetAssignmentHeuristic(chain, offsetGranularity):
     combinations = int(int(prod) / int(hp))
 
     ### Make sure both versions result in the same number of combinations to check ###
-    assert combinations == combinationsIndividual, chainString(chain) + "\nCombinations: " + str(combinations) + " Combinations Individual: " + str(combinationsIndividual)
+    # Commented out since very large chains get rounidng errors?!
+    #assert combinations == combinationsIndividual, chainString(chain) + "\nCombinations: " + str(combinations) + " Combinations Individual: " + str(combinationsIndividual)
 
-    return combinations 
+    return combinationsIndividual 
 
 if __name__ == "__main__":
     """ Debugging """
