@@ -10,6 +10,7 @@
 from Time import *
 from Task import *
 import os
+from DPT_Offset import *
 
 def optimalPhasingMaxHarm(chain):
     """ Function assigns optimal task phases to minimize end-to-end latency 
@@ -65,6 +66,7 @@ def optimalPhasingSemiHarm(chain):
             
             if task == tau_p:
                 task.offset = task.offset + gamma
+                offset = offset + gamma
 
             offset = offset + task.period
     else:
@@ -76,6 +78,7 @@ def optimalPhasingSemiHarm(chain):
             
             if (task.period == max1Period) and (task != tau_p) and (task in nu):
                 task.offset = task.offset + gamma
+                offset = offset + gamma
                 
             offset = offset + task.period
     
@@ -125,6 +128,7 @@ if __name__ == '__main__':
     os.system('cls' if os.name == 'nt' else 'clear')    # Clear the terminal
 
     # Example Fig. 2b
+    print("=====================================================================================")
     print("Example: Max-Harmonic (Fig. 2b)")
     task1 = Task('Task1', useconds(1), mseconds(10), mseconds(10), 0)
     task2 = Task('Task2', useconds(1), mseconds(1), mseconds(1), 0)
@@ -139,7 +143,8 @@ if __name__ == '__main__':
     assert latencyBound == mseconds(31) # Check that the result is correct
     
     # Example Fig. 4b
-    print("\nExample: Semi Harminic Automotive (Fig. 4b)")
+    print("\n=====================================================================================")
+    print("Example: Semi Harminic Automotive (Fig. 4b)")
     task1 = Task('Task1', useconds(1), mseconds(5), mseconds(5), 0)
     task2 = Task('Task2', useconds(1), mseconds(1), mseconds(1), 0)
     task3 = Task('Task3', useconds(1), mseconds(2), mseconds(2), 0)
@@ -153,6 +158,7 @@ if __name__ == '__main__':
 
     assert latencyBound == mseconds(15) # Check that the result is correct
 
+    print("\n=====================================================================================")
     task1 = Task('Task1', useconds(1), mseconds(20), mseconds(20), 0)
     task2 = Task('Task2', useconds(1), mseconds(50), mseconds(50), 0)
     task3 = Task('Task3', useconds(1), mseconds(5), mseconds(5), 0)
@@ -168,5 +174,32 @@ if __name__ == '__main__':
 
     print("Max Data Age = %s" % (printTime(latencyBound)))
 
+    # Test Chain
+    print("\n=====================================================================================")
+    #To Check 50000 -> 20000 -> 1000 -> 50000 -> 50000 -> 1000 Optimal Phasing Latency: 2.32 Offset Latency: 2.72
+    task1 = Task('Task1', useconds(1), mseconds(50), mseconds(50), 0)
+    task2 = Task('Task2', useconds(1), mseconds(20), mseconds(20), 0)
+    task3 = Task('Task3', useconds(1), mseconds(1), mseconds(1), 0)
+    task4 = Task('Task4', useconds(1), mseconds(50), mseconds(50), 0)
+    task5 = Task('Task4', useconds(1), mseconds(50), mseconds(50), 0)
+    task6 = Task('Task4', useconds(1), mseconds(1), mseconds(1), 0)
+
+    chain = [task1, task2, task3, task4, task5, task6]
+
+    print(chainString(chain))
+    
+    latencyBound = optimalPhasingSemiHarm(chain)
+
+    print("Offset:")
+    prev = 0
     for task in chain:
-        print(task)
+        print(printTime(task.offset) + " delta: " + printTime(task.offset - prev))
+        prev = task.offset
+
+    print("\nLatency Bound: " + printTime(latencyBound))
+
+    dptOffset = DPT(chain)
+    dptOffset.getDpt()
+    offsetLatency = dptOffset.maxAge
+
+    print("Exact Analysis: " + printTime(offsetLatency))

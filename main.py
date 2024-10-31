@@ -28,9 +28,9 @@ def experiments(seed, onlyMaxHarmonic):
         dstPath = "plots/semiHarmonic"          # Final plots are stored here
     
     # Experiment Configuration
-    expCount = 50                               # Number of experiments for each configuration and data point
+    expCount = 1000                               # Number of experiments for each configuration and data point
     minChainLength = 2                          # Minimum length of generated chains
-    maxChainLength = 10                         # Maximum length of generated chains
+    maxChainLength = 15                         # Maximum length of generated chains
     stepChainLength = 1                         # Step between two examined chain length
 
     # Configuration for the crude progress bar (no need to change, only visual effect. No effect on experiment itself)
