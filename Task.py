@@ -122,6 +122,14 @@ def hyperperiod(tasks):
     
     return math.lcm(*periods)
 
+def chainString(chain):
+    retval = str(chain[0].period)
+
+    for task in chain[1:]:
+        retval = retval + ' -> ' + str(task.period)
+
+    return retval
+
 if __name__ == '__main__':
     """ Debugging """
     random.seed(123)

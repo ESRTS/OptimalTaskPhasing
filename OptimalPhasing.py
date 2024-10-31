@@ -160,6 +160,8 @@ if __name__ == '__main__':
 
     chain = [task1, task2, task3, task4]
 
+    print(chainString(chain))
+
     latencyBound = optimalPhasingSemiHarm(chain)
 
     assert latencyBound == mseconds(155) # Check that the result is correct

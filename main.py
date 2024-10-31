@@ -127,13 +127,13 @@ def experiments(seed, onlyMaxHarmonic):
                     #############################
 
                     # Make sure the optimal phasing is always smaller or equal than the synchronous release
-                    assert optPhasingLatency <= synchronousLatency
+                    assert optPhasingLatency <= synchronousLatency, chainString(chain) + " Optimal Phasing Latency: " + str(optPhasingLatency) + " Synchronous Latency: " + str(synchronousLatency)
 
                     # Make sure the optimal phasing is always smaller or equal than the random phasing
-                    assert optPhasingLatency <= rndPhasingLatency
+                    assert optPhasingLatency <= rndPhasingLatency, chainString(chain) + " Optimal Phasing Latency: " + str(optPhasingLatency) + " Random Phasing Latency: " + str(rndPhasingLatency)
 
                     # Make sure that the latency we compute with the proposed phasing is always equal to the exact analysis
-                    assert optPhasingLatency == offsetLatency
+                    assert optPhasingLatency == offsetLatency, chainString(chain) + " Optimal Phasing Latency: " + str(optPhasingLatency) + " Offset Latency: " + str(offsetLatency)
 
                     ratio = optPhasingLatency / synchronousLatency 
                     if ratio < bestRatio:
@@ -154,7 +154,6 @@ def experiments(seed, onlyMaxHarmonic):
 
     os.makedirs(dstPath, exist_ok=True)    # Create plots folder if it does not exist   
     plot(basePath, dstPath, minChainLength, maxChainLength, stepChainLength)
-
 
 def main():
 
