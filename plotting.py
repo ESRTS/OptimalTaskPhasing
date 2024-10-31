@@ -121,8 +121,11 @@ def readAverageValues(dataFolder, start, stop, step):
     return outputData
 
 def geo_mean(iterable):
+    """ Compute the geometric mean. Using mapping to log domain to avoid overflow as described here:
+        https://stackoverflow.com/questions/43099542/python-easy-way-to-do-geometric-mean-in-python#:~:text=You%20can%20also%20calculate%20the,result%3A%201.8171205928321397
+    """
     a = np.array(iterable)
-    return a.prod()**(1.0/len(a))
+    return np.exp(np.log(a).mean())
 
 def readAverageValuesGeometric(dataFolder, start, stop, step):
 
