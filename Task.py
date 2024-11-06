@@ -123,10 +123,10 @@ def hyperperiod(tasks):
     return math.lcm(*periods)
 
 def chainString(chain):
-    retval = str(chain[0].period)
+    retval = printTime(chain[0].period) + "/" + printTime(chain[0].offset)
 
     for task in chain[1:]:
-        retval = retval + ' -> ' + printTime(task.period)
+        retval = retval + ' -> ' + printTime(task.period) + "/" + printTime(task.offset)
 
     return retval
 

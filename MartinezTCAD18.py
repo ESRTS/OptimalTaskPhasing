@@ -12,6 +12,8 @@ from Time import *
 from Task import *
 from Comparison import davareBound
 from DPT_Offset import DPT
+from OptimalPhasing import optimalPhasingSemiHarm
+import networkx as nx
 import math
 import os
 
@@ -41,10 +43,6 @@ def calculateLatencyMartinezTCAD18(chain):
             readingPoints.append(tmpRp)
             rp_n.append(n-1)
 
-    #for rp in readingPoints:
-    #    print(printTime(rp))
-
-    #readingPoints = [mseconds(30), mseconds(36), mseconds(42)]
     # Calculate the corresponding start of the basic path using Algorithm 1
     initialPublishingPoints = []
     n = 0
@@ -172,6 +170,79 @@ def combinationsHeuristic(chain, offsetGranularity):
 
     return combinationsIndividual 
 
+class OffsetNode:
+    """ This is a helper class we use as vertex in the tree to represent all offset combinations. """
+    def __init__(self, task_id, offset):
+        self.task_id = task_id
+        self.offset = offset
+
+def heuristicOptimalPhasing(chain, offsetGranularity):
+    """ Implements Algorithm 2 to identify the optimal phasing, considering the complete depth of the chain. 
+        This is implemented by building a tree where each level represents a task in the chain (starting from task 0) and a distinct offset assignment.
+        We then have to check the latency for each path from the root node to leafe nodes. 
+        Once an end node is reached, the latency of the chain is analyzed. The smallest latency and related leafe node is returned. That way we can then
+        reconstruct the offset assignment without the need to search the tree again. """
+
+    for task in chain:
+        assert task.period % offsetGranularity == 0
+
+    graph = nx.DiGraph()
+    
+    rootCase = OffsetNode(0,0)
+    graph.add_node(rootCase)            # task 0 has always offset 0
+    prevLcm = int(chain[0].period / offsetGranularity)
+
+    ret = createCombinationsRec(chain, 1, prevLcm, graph, rootCase, offsetGranularity)    # recursively create all possible combinations 
+
+    # Now we have to assign the offsets to the task according to the smallest latency value that was found.
+    node = ret[1]    # Get the leafe node associated with the smallest latency
+
+    while True:
+        chain[node.task_id].offset = node.offset * offsetGranularity
+        assert graph.in_degree(node) <= 1
+
+        if graph.in_degree(node) == 1:
+            inputEdges = graph.in_edges(node)
+            for u, v in inputEdges: #
+                node = u
+        else:
+            break
+    return ret[0]
+
+def createCombinationsRec(chain, pos, prevLcm, graph, node, offsetGranularity):
+    """ Recursively explore all non-equivalent period combinations. """
+
+    if pos >= len(chain):
+        # Analyze offsets if we reached the end of the chain.
+        maxLatency = calculateLatencyMartinezTCAD18(chain)
+        #print("Analysing: " + chainString(chain) + " => Latency = " + printTime(maxLatency))
+        
+        return [maxLatency, node]    # return the latency but also the final node, so we can reconstruct the offsets at the end
+    
+    period = int(chain[pos].period / offsetGranularity)
+
+    rangeBound = math.gcd(period, prevLcm)
+
+    prevLcm = math.lcm(period, prevLcm) # compute the LCM of all previous periods for the next depth
+
+    bestOffset = None
+    for offset in range(0, rangeBound):
+        #print("Pos: " + str(pos) + " Range Bound: " + str(rangeBound))
+        newNode = OffsetNode(pos, offset)
+        chain[pos].offset = offset * offsetGranularity  # Set the offset also for the task in the chain
+        graph.add_node(newNode)
+        graph.add_edge(node, newNode)
+
+        ret = createCombinationsRec(chain, pos+1, prevLcm, graph, newNode, offsetGranularity)
+        
+        if bestOffset is None:
+            bestOffset = ret
+        else:
+            if bestOffset[0] > ret[0]:
+                bestOffset = ret
+
+    return bestOffset
+            
 if __name__ == '__main__':
     """ Debugging """
     os.system('cls' if os.name == 'nt' else 'clear')    # Clear the terminal
@@ -214,8 +285,29 @@ if __name__ == '__main__':
 
     combinations = combinationsHeuristic(chain, mseconds(1))
 
+
     print("Case Study: " + str(combinations) + " are checked with the heuristic.")
 
+    heur = heuristicOptimalPhasing(chain, mseconds(1))
+    
+    print("Heuristic: " + chainString(chain) + " => Latency = " + printTime(heur))
+
+    dpt = DPT(chain)
+    dpt.getDpt()
+    print("Exact Analysis : " + chainString(chain) + " => Latency = " + printTime(dpt.maxAge))
+
+    task1 = Task('Task1', useconds(1), mseconds(20), mseconds(20), 0)
+    task2 = Task('Task2', useconds(1), mseconds(50), mseconds(50), 0)
+    task3 = Task('Task3', useconds(1), mseconds(20), mseconds(20), 0)
+    task4 = Task('Task1', useconds(1), mseconds(50), mseconds(50), 0)
+    opt = optimalPhasingSemiHarm(chain)
+
+    print("Optimal Latency = " + printTime(opt))
+
+    print("Martinez Latency = " + printTime(calculateLatencyMartinezTCAD18(chain)))
+
+    print("Ours Optimal: " + chainString(chain) + " => Latency = " + printTime(opt))
+    assert heur == opt
     # Example
     print("\n=====================================================================================")
 
@@ -241,13 +333,20 @@ if __name__ == '__main__':
 
     # Example Fig. 12 in the paper
     task1 = Task('Task1', useconds(1), mseconds(10), mseconds(10), 0)
-    task2 = Task('Task2', useconds(1), mseconds(5), mseconds(5), mseconds(10))
+    task2 = Task('Task2', useconds(1), mseconds(5), mseconds(5), 0)
 
     chain = [task1, task2]
 
     latency = calculateLatencyMartinezTCAD18(chain)
 
-    print("Latency: " + str(latency))
+    print("Latency before offset heuristic: " + str(latency))
+
+    heuristicOptimalPhasing(chain, mseconds(1))
+
+    task1 = Task('Task1', useconds(1), mseconds(10), mseconds(10), 0)
+    task2 = Task('Task2', useconds(1), mseconds(5), mseconds(5), mseconds(10))
+
+    chain = [task1, task2]
 
     dpt = DPT(chain)
     dpt.getDpt()
