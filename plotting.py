@@ -57,6 +57,7 @@ def readDataFrameIndividual(dataFolder, length):
             outputData.append(['Optimal Phasing', length, float((row[3])), float((row[4]))])
             #outputData.append(['OFFSET_EXP', length, float((row[5])), float((row[6]))])
             outputData.append(['Random Phasing', length, float((row[9])), float((row[10]))])
+            #outputData.append(['Martinez\'18', length, float((row[9])), float((row[10]))])
             assert row[3] == row[5]
     
     return outputData
@@ -158,6 +159,20 @@ def readAverageValuesGeometric(dataFolder, start, stop, step):
         outputData.append(['Optimal Phasing', avrgOpt, length])
         outputData.append(['Random Phasing', avrgRnd, length])
     return outputData
+
+def getImprovementForChainLength(dataFolder, length) :
+
+    imp = []
+    filename = dataFolder + "/length_" + str(length) + ".csv"
+
+    with open(filename,'r') as csvfile: 
+            data = csv.reader(csvfile, delimiter = ',') 
+            for row in data: 
+                sync = float((row[1]))
+                opt = float((row[3]))
+                imp.append(opt/sync)
+    
+    return np.average(imp)
 
 def plot(dataFolder, dstFolder, start, stop, step):
     """ Create plotw for the files in the dataFolder. """
@@ -275,3 +290,5 @@ def plot(dataFolder, dstFolder, start, stop, step):
     plt.figure.savefig(dstFolder + "/HeuristicCombinations.pdf", bbox_inches='tight')
     
     plt.cla()
+
+    print("Average improvement for chain length 20: " + str(getImprovementForChainLength(dataFolder, 20)))

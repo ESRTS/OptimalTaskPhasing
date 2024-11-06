@@ -63,10 +63,6 @@ def optimalPhasingSemiHarm(chain):
 
         for task in chain:
             task.offset = offset
-            
-            if task == tau_p:
-                task.offset = task.offset + gamma
-                offset = offset + gamma
 
             offset = offset + task.period
     else:
@@ -203,3 +199,34 @@ if __name__ == '__main__':
     offsetLatency = dptOffset.maxAge
 
     print("Exact Analysis: " + printTime(offsetLatency))
+
+    print("\n=====================================================================================")
+    task1 = Task('Task1', useconds(1), mseconds(2), mseconds(2), 0)
+    task2 = Task('Task2', useconds(1), mseconds(5), mseconds(5), 0)
+    task3 = Task('Task3', useconds(1), mseconds(2), mseconds(2), 0)
+    task4 = Task('Task4', useconds(1), mseconds(5), mseconds(5), 0)
+    task5 = Task('Task4', useconds(1), mseconds(2), mseconds(2), 0)
+    task6 = Task('Task4', useconds(1), mseconds(5), mseconds(5), 0)
+    task7 = Task('Task3', useconds(1), mseconds(2), mseconds(2), 0)
+    task8 = Task('Task4', useconds(1), mseconds(5), mseconds(5), 0)
+    task9 = Task('Task4', useconds(1), mseconds(2), mseconds(2), 0)
+    task10 = Task('Task2', useconds(1), mseconds(5), mseconds(5), 0)
+    task11 = Task('Task3', useconds(1), mseconds(2), mseconds(2), 0)
+    task12 = Task('Task4', useconds(1), mseconds(5), mseconds(5), 0)
+    task13 = Task('Task4', useconds(1), mseconds(2), mseconds(2), 0)
+
+    chain = [task1, task2, task3, task4, task5, task6, task7, task8, task9, task10, task11, task12, task13]
+
+    latencyBound = optimalPhasingSemiHarm(chain)
+    print("\nLatency Bound: " + printTime(latencyBound))
+
+    dpt = DPT(chain)
+    dpt.getDpt()
+    print("\nLatency Bound: " + printTime(dpt.maxAge))
+
+    prev = 0
+    for task in chain:
+        print(printTime(task.offset) + " delta: " + printTime(task.offset - prev))
+        prev = task.offset
+
+    assert latencyBound == dpt.maxAge

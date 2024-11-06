@@ -3,6 +3,7 @@ from Task import hyperperiod
 from DPT_Offset import *
 from OptimalPhasing import *
 from Comparison import *
+from MartinezTCAD18 import *
 from plotting import *
 import random
 from timeit import default_timer as timer
@@ -28,9 +29,9 @@ def experiments(seed, onlyMaxHarmonic):
         dstPath = "plots/semiHarmonic"          # Final plots are stored here
     
     # Experiment Configuration
-    expCount = 5000                             # Number of experiments for each configuration and data point
+    expCount = 100                              # Number of experiments for each configuration and data point
     minChainLength = 2                          # Minimum length of generated chains
-    maxChainLength = 20                         # Maximum length of generated chains
+    maxChainLength = 10                         # Maximum length of generated chains
     stepChainLength = 1                         # Step between two examined chain length
 
     # Configuration for the crude progress bar (no need to change, only visual effect. No effect on experiment itself)
@@ -105,6 +106,13 @@ def experiments(seed, onlyMaxHarmonic):
                     durDptOffset = timer() - startDptOffset
 
                     #############################
+                    # Martinez TCAD'18 
+                    #############################
+                    startMartinez = timer()
+                    martinezLatency = calculateLatencyMartinezTCAD18(chain) / hp
+                    durMartinez = timer() - startMartinez
+
+                    #############################
                     # Davare bound, i.e. worst-case phasing
                     #############################
                     startDavare = timer()
@@ -123,7 +131,7 @@ def experiments(seed, onlyMaxHarmonic):
 
                     #############################
                     # Offset Heuristic
-                    numAssignments = offsetAssignmentHeuristic(chain, mseconds(1))
+                    numAssignments = combinationsHeuristic(chain, mseconds(1))
                     #############################
 
                     # Make sure the optimal phasing is always smaller or equal than the synchronous release
@@ -131,6 +139,9 @@ def experiments(seed, onlyMaxHarmonic):
 
                     # Make sure the optimal phasing is always smaller or equal than the random phasing
                     assert optPhasingLatency <= rndPhasingLatency, chainString(chain) + " Optimal Phasing Latency: " + str(optPhasingLatency) + " Random Phasing Latency: " + str(rndPhasingLatency)
+
+                    # Make sure the latency by Martinez TCAD'18 is the same as Becker JSA'17
+                    assert martinezLatency == offsetLatency, "Latency Martinez TCAD'18: " + printTime(martinezLatency) + " Latency Becker JSA'17: " + printTime(offsetLatency) + " Chain: " + chainString(chain)
 
                     # Make sure that the latency we compute with the proposed phasing is always equal to the exact analysis
                     assert optPhasingLatency == offsetLatency, chainString(chain) + " Optimal Phasing Latency: " + str(optPhasingLatency) + " Offset Latency: " + str(offsetLatency)
@@ -147,6 +158,7 @@ def experiments(seed, onlyMaxHarmonic):
                                + "{:.6f}".format(offsetLatency) + ',' + "{:.6f}".format(durDptOffset) + ',' 
                                + "{:.6f}".format(davareLatency) + ',' + "{:.6f}".format(durDavare) + ',' 
                                + "{:.6f}".format(rndPhasingLatency) + ',' + "{:.6f}".format(durRandomPhasing) + ','
+                               + "{:.6f}".format(martinezLatency) + ',' + "{:.6f}".format(durMartinez) + ','
                                + str(numAssignments) + ',' + str(maxHarmonic) + '\n')
                     
             file.close()
