@@ -57,7 +57,8 @@ def readDataFrameIndividual(dataFolder, length):
             outputData.append(['Optimal Phasing', length, float((row[3])), float((row[4]))])
             #outputData.append(['OFFSET_EXP', length, float((row[5])), float((row[6]))])
             outputData.append(['Random Phasing', length, float((row[9])), float((row[10]))])
-            #outputData.append(['Martinez\'18', length, float((row[9])), float((row[10]))])
+            outputData.append(['Martinez_Latency', length, float((row[11])), float((row[12]))])
+            outputData.append(['Martinez_Heuristic', length, float((row[13])), float((row[14]))])
             assert row[3] == row[5]
     
     return outputData
@@ -83,7 +84,7 @@ def readOffsetHeuristicData(dataFolder, start, stop, step):
         with open(filename,'r') as csvfile: 
             data = csv.reader(csvfile, delimiter = ',') 
             for row in data: 
-                outputData.append(['Heuristic', length, int(row[11])])
+                outputData.append(['Heuristic', length, int(row[15])])
     
     return outputData
 
@@ -290,5 +291,3 @@ def plot(dataFolder, dstFolder, start, stop, step):
     plt.figure.savefig(dstFolder + "/HeuristicCombinations.pdf", bbox_inches='tight')
     
     plt.cla()
-
-    print("Average improvement for chain length 20: " + str(getImprovementForChainLength(dataFolder, 20)))

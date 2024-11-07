@@ -12,7 +12,7 @@ from Time import *
 from Task import *
 from Comparison import davareBound
 from DPT_Offset import DPT
-from OptimalPhasing import optimalPhasingSemiHarm
+from OptimalPhasing import *
 import networkx as nx
 import math
 import os
@@ -39,7 +39,7 @@ def calculateLatencyMartinezTCAD18(chain):
     while tmpRp < worstCaseLatency + hp + maxOffset:
         tmpRp = getReadingPoint(secondLast, last, n)
         n = n + 1
-        if  worstCaseLatency + maxOffset <= tmpRp < worstCaseLatency + hp + maxOffset:
+        if  worstCaseLatency + maxOffset <= tmpRp <= worstCaseLatency + hp + maxOffset:
             readingPoints.append(tmpRp)
             rp_n.append(n-1)
 
@@ -102,8 +102,11 @@ def getBasicPathEtoE(chain, publishingPoint, readingPoint, nextReadingPoint):
     # Length of the basic path
     theta = readingPoint - publishingPoint 
 
+    nextUpdate = nextReadingPoint - readingPoint
+    
+    #print("Theta: " + printTime(theta) + " next update: " + printTime(nextUpdate))
     # Equation 5
-    latency = chain[0].period + theta + nextReadingPoint - readingPoint
+    latency = chain[0].period + theta + nextUpdate
     
     # In addition to Equation 5 we add the period of the last task in the chain to mark when the data is overwritten by the next basic path
     latency = latency  + chain[len(chain)-1].period 
@@ -214,6 +217,9 @@ def createCombinationsRec(chain, pos, prevLcm, graph, node, offsetGranularity):
 
     if pos >= len(chain):
         # Analyze offsets if we reached the end of the chain.
+
+        #if chain[2].offset == mseconds(10):
+            #print("now")
         maxLatency = calculateLatencyMartinezTCAD18(chain)
         #print("Analysing: " + chainString(chain) + " => Latency = " + printTime(maxLatency))
         
@@ -226,7 +232,7 @@ def createCombinationsRec(chain, pos, prevLcm, graph, node, offsetGranularity):
     prevLcm = math.lcm(period, prevLcm) # compute the LCM of all previous periods for the next depth
 
     bestOffset = None
-    for offset in range(0, rangeBound):
+    for offset in range(0, rangeBound+1):
         #print("Pos: " + str(pos) + " Range Bound: " + str(rangeBound))
         newNode = OffsetNode(pos, offset)
         chain[pos].offset = offset * offsetGranularity  # Set the offset also for the task in the chain
@@ -247,60 +253,139 @@ if __name__ == '__main__':
     """ Debugging """
     os.system('cls' if os.name == 'nt' else 'clear')    # Clear the terminal
 
-    # Example Fig. 12 in the paper
-    task1 = Task('Task1', useconds(1), mseconds(3), mseconds(3), 0)
-    task2 = Task('Task2', useconds(1), mseconds(7), mseconds(7), 0)
-    task3 = Task('Task3', useconds(1), mseconds(3), mseconds(3), 0)
+    # # Example Fig. 12 in the paper
+    # task1 = Task('Task1', useconds(1), mseconds(3), mseconds(3), 0)
+    # task2 = Task('Task2', useconds(1), mseconds(7), mseconds(7), 0)
+    # task3 = Task('Task3', useconds(1), mseconds(3), mseconds(3), 0)
 
-    chain = [task1, task2, task3]
+    # chain = [task1, task2, task3]
 
-    latency = calculateLatencyMartinezTCAD18(chain)
+    # latency = calculateLatencyMartinezTCAD18(chain)
 
-    print("Latency: " + str(latency))
+    # print("Latency: " + str(latency))
 
-    dpt = DPT(chain)
-    dpt.getDpt()
+    # dpt = DPT(chain)
+    # dpt.getDpt()
 
-    assert latency == dpt.maxAge, printTime(latency) + " vs. " + printTime(dpt.maxAge)
+    # assert latency == dpt.maxAge, printTime(latency) + " vs. " + printTime(dpt.maxAge)
 
-    # Case Study - Harmonic
+    # # Case Study - Harmonic
+    # print("\n=====================================================================================")
+    # task1 = Task('Task1', useconds(1), mseconds(10), mseconds(10), 0)
+    # task2 = Task('Task2', useconds(1), mseconds(50), mseconds(50), 0)
+    # task3 = Task('Task3', useconds(1), mseconds(10), mseconds(10), 0)
+    # task4 = Task('Task1', useconds(1), mseconds(50), mseconds(50), 0)
+    # chain = [task1, task2, task3, task4]
+
+    # combinations = combinationsHeuristic(chain, mseconds(1))
+
+    # print("Case Study: " + str(combinations) + " are checked with the heuristic.")
+
+    # # Case Study - Semi-Harmonic Automotive
+    # print("\n=====================================================================================")
+    # task1 = Task('Task1', useconds(1), mseconds(20), mseconds(20), 0)
+    # task2 = Task('Task2', useconds(1), mseconds(50), mseconds(50), 0)
+    # task3 = Task('Task3', useconds(1), mseconds(20), mseconds(20), 0)
+    # task4 = Task('Task1', useconds(1), mseconds(50), mseconds(50), 0)
+    # chain = [task1, task2, task3, task4]
+
+    # combinations = combinationsHeuristic(chain, mseconds(1))
+
+
+    # print("Case Study: " + str(combinations) + " are checked with the heuristic.")
+
+    # heur = heuristicOptimalPhasing(chain, mseconds(1))
+    
+    # print("Heuristic: " + chainString(chain) + " => Latency = " + printTime(heur))
+
+    # dpt = DPT(chain)
+    # dpt.getDpt()
+    # print("Exact Analysis : " + chainString(chain) + " => Latency = " + printTime(dpt.maxAge))
+
+    # task1 = Task('Task1', useconds(1), mseconds(20), mseconds(20), 0)
+    # task2 = Task('Task2', useconds(1), mseconds(50), mseconds(50), 0)
+    # task3 = Task('Task3', useconds(1), mseconds(20), mseconds(20), 0)
+    # task4 = Task('Task1', useconds(1), mseconds(50), mseconds(50), 0)
+    # opt = optimalPhasingSemiHarm(chain)
+
+    # print("Optimal Latency = " + printTime(opt))
+
+    # print("Martinez Latency = " + printTime(calculateLatencyMartinezTCAD18(chain)))
+
+    # print("Ours Optimal: " + chainString(chain) + " => Latency = " + printTime(opt))
+    # assert heur == opt
+    # # Example
+    # print("\n=====================================================================================")
+
+    # task1 = Task('Task1', useconds(1), mseconds(1000), mseconds(1000), 0)
+    # task2 = Task('Task2', useconds(1), mseconds(200), mseconds(200), 0)
+    # task3 = Task('Task3', useconds(1), mseconds(10), mseconds(10), 0)
+    # task4 = Task('Task1', useconds(1), mseconds(1000), mseconds(1000), 0)
+    # task5 = Task('Task1', useconds(1), mseconds(50), mseconds(50), 0)
+    # task6 = Task('Task1', useconds(1), mseconds(1), mseconds(1), 0)
+    # task7 = Task('Task1', useconds(1), mseconds(100), mseconds(100), 0)
+    # task8 = Task('Task1', useconds(1), mseconds(1000), mseconds(1000), 0)
+    # task9 = Task('Task1', useconds(1), mseconds(100), mseconds(100), 0)
+    # task10 = Task('Task1', useconds(1), mseconds(1000), mseconds(1000), 0)
+    # task11 = Task('Task1', useconds(1), mseconds(200), mseconds(200), 0)
+
+    # chain = [task1, task2, task3, task4, task5, task6, task7, task8, task9, task10, task11]
+
+    # assignments = combinationsHeuristic(chain, mseconds(1))
+
+    # print(str(assignments) + " offset assignments to check")
+
+    # print("\n=====================================================================================")
+
+    # # Example Fig. 12 in the paper
+    # task1 = Task('Task1', useconds(1), mseconds(10), mseconds(10), 0)
+    # task2 = Task('Task2', useconds(1), mseconds(5), mseconds(5), 0)
+
+    # chain = [task1, task2]
+
+    # latency = calculateLatencyMartinezTCAD18(chain)
+
+    # print("Latency before offset heuristic: " + str(latency))
+
+    # heuristicOptimalPhasing(chain, mseconds(1))
+
+    # task1 = Task('Task1', useconds(1), mseconds(10), mseconds(10), 0)
+    # task2 = Task('Task2', useconds(1), mseconds(5), mseconds(5), mseconds(10))
+
+    # chain = [task1, task2]
+
+    # dpt = DPT(chain)
+    # dpt.getDpt()
+
+    # assert latency == dpt.maxAge, printTime(latency) + " vs. " + printTime(dpt.maxAge)
+
     print("\n=====================================================================================")
-    task1 = Task('Task1', useconds(1), mseconds(10), mseconds(10), 0)
-    task2 = Task('Task2', useconds(1), mseconds(50), mseconds(50), 0)
-    task3 = Task('Task3', useconds(1), mseconds(10), mseconds(10), 0)
-    task4 = Task('Task1', useconds(1), mseconds(50), mseconds(50), 0)
-    chain = [task1, task2, task3, task4]
 
-    combinations = combinationsHeuristic(chain, mseconds(1))
-
-    print("Case Study: " + str(combinations) + " are checked with the heuristic.")
-
-    # Case Study - Semi-Harmonic Automotive
-    print("\n=====================================================================================")
-    task1 = Task('Task1', useconds(1), mseconds(20), mseconds(20), 0)
+    task1 = Task('Task1', useconds(1), mseconds(200), mseconds(200), 0)
     task2 = Task('Task2', useconds(1), mseconds(50), mseconds(50), 0)
     task3 = Task('Task3', useconds(1), mseconds(20), mseconds(20), 0)
-    task4 = Task('Task1', useconds(1), mseconds(50), mseconds(50), 0)
-    chain = [task1, task2, task3, task4]
+    
+    chain = [task1, task2, task3]
 
     combinations = combinationsHeuristic(chain, mseconds(1))
-
 
     print("Case Study: " + str(combinations) + " are checked with the heuristic.")
 
     heur = heuristicOptimalPhasing(chain, mseconds(1))
     
+    chain[2].offset = mseconds(10)
+
     print("Heuristic: " + chainString(chain) + " => Latency = " + printTime(heur))
 
     dpt = DPT(chain)
     dpt.getDpt()
     print("Exact Analysis : " + chainString(chain) + " => Latency = " + printTime(dpt.maxAge))
 
-    task1 = Task('Task1', useconds(1), mseconds(20), mseconds(20), 0)
+    task1 = Task('Task1', useconds(1), mseconds(200), mseconds(200), 0)
     task2 = Task('Task2', useconds(1), mseconds(50), mseconds(50), 0)
     task3 = Task('Task3', useconds(1), mseconds(20), mseconds(20), 0)
-    task4 = Task('Task1', useconds(1), mseconds(50), mseconds(50), 0)
-    opt = optimalPhasingSemiHarm(chain)
+    
+    opt = optimalPhasingMaxHarm(chain)
 
     print("Optimal Latency = " + printTime(opt))
 
@@ -308,47 +393,3 @@ if __name__ == '__main__':
 
     print("Ours Optimal: " + chainString(chain) + " => Latency = " + printTime(opt))
     assert heur == opt
-    # Example
-    print("\n=====================================================================================")
-
-    task1 = Task('Task1', useconds(1), mseconds(1000), mseconds(1000), 0)
-    task2 = Task('Task2', useconds(1), mseconds(200), mseconds(200), 0)
-    task3 = Task('Task3', useconds(1), mseconds(10), mseconds(10), 0)
-    task4 = Task('Task1', useconds(1), mseconds(1000), mseconds(1000), 0)
-    task5 = Task('Task1', useconds(1), mseconds(50), mseconds(50), 0)
-    task6 = Task('Task1', useconds(1), mseconds(1), mseconds(1), 0)
-    task7 = Task('Task1', useconds(1), mseconds(100), mseconds(100), 0)
-    task8 = Task('Task1', useconds(1), mseconds(1000), mseconds(1000), 0)
-    task9 = Task('Task1', useconds(1), mseconds(100), mseconds(100), 0)
-    task10 = Task('Task1', useconds(1), mseconds(1000), mseconds(1000), 0)
-    task11 = Task('Task1', useconds(1), mseconds(200), mseconds(200), 0)
-
-    chain = [task1, task2, task3, task4, task5, task6, task7, task8, task9, task10, task11]
-
-    assignments = combinationsHeuristic(chain, mseconds(1))
-
-    print(str(assignments) + " offset assignments to check")
-
-    print("\n=====================================================================================")
-
-    # Example Fig. 12 in the paper
-    task1 = Task('Task1', useconds(1), mseconds(10), mseconds(10), 0)
-    task2 = Task('Task2', useconds(1), mseconds(5), mseconds(5), 0)
-
-    chain = [task1, task2]
-
-    latency = calculateLatencyMartinezTCAD18(chain)
-
-    print("Latency before offset heuristic: " + str(latency))
-
-    heuristicOptimalPhasing(chain, mseconds(1))
-
-    task1 = Task('Task1', useconds(1), mseconds(10), mseconds(10), 0)
-    task2 = Task('Task2', useconds(1), mseconds(5), mseconds(5), mseconds(10))
-
-    chain = [task1, task2]
-
-    dpt = DPT(chain)
-    dpt.getDpt()
-
-    assert latency == dpt.maxAge, printTime(latency) + " vs. " + printTime(dpt.maxAge)

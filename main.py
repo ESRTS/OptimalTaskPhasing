@@ -7,13 +7,16 @@ from MartinezTCAD18 import *
 from plotting import *
 import random
 from timeit import default_timer as timer
+from datetime import datetime
 import os
 
-def experiments(seed, onlyMaxHarmonic):
+def experiments(seed, onlyMaxHarmonic, runHeuristic):
     """
     This function executes the experiments with cause-effect chains that have automotive periods. 
     The chain length is varied from minChainLength to maxChainLength, and for each setting expCount random chains are examined.
     """
+    expStart = datetime.now()
+    print("Start at:", expStart.strftime("%d/%m/%Y %H:%M:%S"))
 
     if onlyMaxHarmonic:
         print("Experiment: Max. Harmonic Chains")
@@ -29,9 +32,9 @@ def experiments(seed, onlyMaxHarmonic):
         dstPath = "plots/semiHarmonic"          # Final plots are stored here
     
     # Experiment Configuration
-    expCount = 100                              # Number of experiments for each configuration and data point
+    expCount = 1000                              # Number of experiments for each configuration and data point
     minChainLength = 2                          # Minimum length of generated chains
-    maxChainLength = 10                         # Maximum length of generated chains
+    maxChainLength = 30                          # Maximum length of generated chains
     stepChainLength = 1                         # Step between two examined chain length
 
     # Configuration for the crude progress bar (no need to change, only visual effect. No effect on experiment itself)
@@ -130,21 +133,35 @@ def experiments(seed, onlyMaxHarmonic):
                     durRandomPhasing = timer() - startRandomPhasing
 
                     #############################
-                    # Offset Heuristic
-                    numAssignments = combinationsHeuristic(chain, mseconds(1))
+                    # Combinations Offset Heuristic
                     #############################
+                    numAssignments = combinationsHeuristic(chain, mseconds(1))
+                    
+                    #############################
+                    # Offset Heuristic Martinez et al.
+                    #############################
+                    if runHeuristic:
+                        startOffsetHeuristic = timer()
+                        heuristicLatency = heuristicOptimalPhasing(chain, mseconds(1)) / hp
+                        durOffsetHeuristic = timer() - startOffsetHeuristic
+                    else:
+                        heuristicLatency = -1
+                        durOffsetHeuristic = -1
 
                     # Make sure the optimal phasing is always smaller or equal than the synchronous release
-                    assert optPhasingLatency <= synchronousLatency, chainString(chain) + " Optimal Phasing Latency: " + str(optPhasingLatency) + " Synchronous Latency: " + str(synchronousLatency)
+                    assert optPhasingLatency <= synchronousLatency, chainString(chain) + " Optimal Phasing Latency: " + printTime(optPhasingLatency) + " Synchronous Latency: " + printTime(synchronousLatency)
 
                     # Make sure the optimal phasing is always smaller or equal than the random phasing
-                    assert optPhasingLatency <= rndPhasingLatency, chainString(chain) + " Optimal Phasing Latency: " + str(optPhasingLatency) + " Random Phasing Latency: " + str(rndPhasingLatency)
+                    assert optPhasingLatency <= rndPhasingLatency, chainString(chain) + " Optimal Phasing Latency: " + printTime(optPhasingLatency) + " Random Phasing Latency: " + printTime(rndPhasingLatency)
 
                     # Make sure the latency by Martinez TCAD'18 is the same as Becker JSA'17
                     assert martinezLatency == offsetLatency, "Latency Martinez TCAD'18: " + printTime(martinezLatency) + " Latency Becker JSA'17: " + printTime(offsetLatency) + " Chain: " + chainString(chain)
 
                     # Make sure that the latency we compute with the proposed phasing is always equal to the exact analysis
-                    assert optPhasingLatency == offsetLatency, chainString(chain) + " Optimal Phasing Latency: " + str(optPhasingLatency) + " Offset Latency: " + str(offsetLatency)
+                    assert optPhasingLatency == offsetLatency, chainString(chain) + " Optimal Phasing Latency: " + printTime(optPhasingLatency) + " Offset Latency: " + printTime(offsetLatency)
+
+                    # Make sure that the offset heuristic latency is the same as our optimal latency
+                    #assert optPhasingLatency == heuristicLatency, chainString(chain) + " Optimal Phasing Latency: " + printTime(optPhasingLatency) + " Offset Heuristic Latency: " + printTime(heuristicLatency)
 
                     ratio = optPhasingLatency / synchronousLatency 
                     if ratio < bestRatio:
@@ -159,6 +176,7 @@ def experiments(seed, onlyMaxHarmonic):
                                + "{:.6f}".format(davareLatency) + ',' + "{:.6f}".format(durDavare) + ',' 
                                + "{:.6f}".format(rndPhasingLatency) + ',' + "{:.6f}".format(durRandomPhasing) + ','
                                + "{:.6f}".format(martinezLatency) + ',' + "{:.6f}".format(durMartinez) + ','
+                               + "{:.6f}".format(heuristicLatency) + ',' + "{:.6f}".format(durOffsetHeuristic) + ','
                                + str(numAssignments) + ',' + str(maxHarmonic) + '\n')
                     
             file.close()
@@ -167,10 +185,17 @@ def experiments(seed, onlyMaxHarmonic):
     os.makedirs(dstPath, exist_ok=True)    # Create plots folder if it does not exist   
     plot(basePath, dstPath, minChainLength, maxChainLength, stepChainLength)
 
+    expFinish = datetime.now()
+    print("\nFinished at:", expFinish.strftime("%d/%m/%Y %H:%M:%S"))
+
+    expDuration = expFinish - expStart
+    print("Duration:", expDuration)
+
 def main():
 
     onlyMaxHarmonic = False  # Set this flag to false to keep also chains that are not max-harmonic
-    experiments(123, onlyMaxHarmonic)
+    runHeuristic = False # Set this flag to enable the offset heuristic by Martinez et al.
+    experiments(123, onlyMaxHarmonic, runHeuristic)
 
 if __name__ == "__main__":
     main()
