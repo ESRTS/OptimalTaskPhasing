@@ -9,6 +9,7 @@ import random
 from timeit import default_timer as timer
 from datetime import datetime
 import os
+import shutil
 
 def experiments(seed, onlyMaxHarmonic, runHeuristic):
     """
@@ -32,10 +33,10 @@ def experiments(seed, onlyMaxHarmonic, runHeuristic):
         dstPath = "plots/semiHarmonic"          # Final plots are stored here
     
     # Experiment Configuration
-    expCount = 1000                              # Number of experiments for each configuration and data point
+    expCount = 100                              # Number of experiments for each configuration and data point
     minChainLength = 2                          # Minimum length of generated chains
     maxChainLength = 30                          # Maximum length of generated chains
-    stepChainLength = 1                         # Step between two examined chain length
+    stepChainLength = 2                         # Step between two examined chain length
 
     # Configuration for the crude progress bar (no need to change, only visual effect. No effect on experiment itself)
     progressDotsMax = 50                    # Config for the length of the crude progress bar
@@ -191,11 +192,123 @@ def experiments(seed, onlyMaxHarmonic, runHeuristic):
     expDuration = expFinish - expStart
     print("Duration:", expDuration)
 
+def caseStudy():
+    
+    basePath = os.path.join('output', 'caseStudy')  # Experiment data is stored here
+    dstPath = os.path.join('plots', 'caseStudy')    # Final plots are stored here
+
+    # If there exists a folder for the case-study data it is removed here to have consistent results stored
+    if os.path.exists(basePath) and os.path.isdir(basePath):
+        shutil.rmtree(basePath)
+
+    os.makedirs(basePath)    # Create output folder 
+
+    print("\n=====================================================================================")
+    print("= Case-Study with harmonic automotive periods")
+    print("=====================================================================================")
+    task1 = Task('Task1', useconds(1), mseconds(10), mseconds(10), 0)
+    task2 = Task('Task2', useconds(1), mseconds(50), mseconds(50), 0)
+    task3 = Task('Task3', useconds(1), mseconds(10), mseconds(10), 0)
+    task4 = Task('Task1', useconds(1), mseconds(50), mseconds(50), 0)
+    chain = [task1, task2, task3, task4]
+
+    dpt = DPT(chain)
+    dpt.getDpt()
+    print("Syncronous Release Exact Analysis : " + chainString(chain) + " => Latency = " + printTime(dpt.maxAge))
+
+    combinations = combinationsHeuristic(chain, mseconds(1))
+
+    print("Case Study: " + str(combinations) + " combinations are checked with the heuristic.")
+
+    start = timer()
+    heur = heuristicOptimalPhasing(chain, mseconds(1))
+    durationHeuristic = timer() - start
+
+    print("Heuristic: " + chainString(chain) + " => Latency = " + printTime(heur) + " in " + str(durationHeuristic * 1000) + " ms")
+
+    dpt = DPT(chain)
+    dpt.getDpt()
+    print("Exact Analysis : " + chainString(chain) + " => Latency = " + printTime(dpt.maxAge))
+
+    task1 = Task('Task1', useconds(1), mseconds(10), mseconds(10), 0)
+    task2 = Task('Task2', useconds(1), mseconds(50), mseconds(50), 0)
+    task3 = Task('Task3', useconds(1), mseconds(10), mseconds(10), 0)
+    task4 = Task('Task1', useconds(1), mseconds(50), mseconds(50), 0)
+
+    start = timer()
+    opt = optimalPhasingMaxHarm(chain)
+    durationOptimal = timer() - start
+
+    print("Optimal Latency = " + printTime(opt) + " in " + str(durationOptimal * 1000) + " ms")
+
+    print("\nMartinez Latency = " + printTime(calculateLatencyMartinezTCAD18(chain)))
+
+    print("Ours Optimal: " + chainString(chain) + " => Latency = " + printTime(opt))
+    assert heur == opt
+
+    filePath = basePath + '/case_study_harmonic.csv'
+    with open(filePath, "a") as file:
+        file.write(str(heur) + "," + "{:.6f}".format(durationHeuristic * 1000) + "," + str(opt) + "," + "{:.6f}".format(durationOptimal * 1000) )
+        file.close()
+
+    # Case Study - Semi-Harmonic Automotive
+    print("\n=====================================================================================")
+    print("= Case-Study with semi-harmonic automotive periods")
+    print("=====================================================================================")
+    task1 = Task('Task1', useconds(1), mseconds(20), mseconds(20), 0)
+    task2 = Task('Task2', useconds(1), mseconds(50), mseconds(50), 0)
+    task3 = Task('Task3', useconds(1), mseconds(20), mseconds(20), 0)
+    task4 = Task('Task1', useconds(1), mseconds(50), mseconds(50), 0)
+    chain = [task1, task2, task3, task4]
+
+    dpt = DPT(chain)
+    dpt.getDpt()
+    print("Syncronous Release Exact Analysis : " + chainString(chain) + " => Latency = " + printTime(dpt.maxAge))
+
+    combinations = combinationsHeuristic(chain, mseconds(1))
+
+
+    print("Case Study: " + str(combinations) + " combinations are checked with the heuristic.")
+
+    start = timer()
+    heur = heuristicOptimalPhasing(chain, mseconds(1))
+    durationHeuristic = timer() - start
+
+    print("Heuristic: " + chainString(chain) + " => Latency = " + printTime(heur) + " in " + str(durationHeuristic * 1000) + " ms")
+
+    dpt = DPT(chain)
+    dpt.getDpt()
+    print("Exact Analysis : " + chainString(chain) + " => Latency = " + printTime(dpt.maxAge))
+
+    task1 = Task('Task1', useconds(1), mseconds(20), mseconds(20), 0)
+    task2 = Task('Task2', useconds(1), mseconds(50), mseconds(50), 0)
+    task3 = Task('Task3', useconds(1), mseconds(20), mseconds(20), 0)
+    task4 = Task('Task1', useconds(1), mseconds(50), mseconds(50), 0)
+
+    start = timer()
+    opt = optimalPhasingSemiHarm(chain)
+    durationOptimal = timer() - start
+
+    print("Optimal Latency = " + printTime(opt) + " in " + str(durationOptimal * 1000) + " ms")
+
+    print("\nMartinez Latency = " + printTime(calculateLatencyMartinezTCAD18(chain)))
+
+    print("Ours Optimal: " + chainString(chain) + " => Latency = " + printTime(opt))
+    assert heur == opt
+
+    filePath = basePath + '/case_study_semiharmonic.csv'
+    with open(filePath, "a") as file:
+        file.write(str(heur) + "," + "{:.6f}".format(durationHeuristic * 1000) + "," + str(opt) + "," + "{:.6f}".format(durationOptimal * 1000) )
+        file.close()
+        
 def main():
+    os.system('cls' if os.name == 'nt' else 'clear')    # Clear the terminal
 
     onlyMaxHarmonic = False  # Set this flag to false to keep also chains that are not max-harmonic
     runHeuristic = False # Set this flag to enable the offset heuristic by Martinez et al.
     experiments(123, onlyMaxHarmonic, runHeuristic)
+
+    #caseStudy()
 
 if __name__ == "__main__":
     main()

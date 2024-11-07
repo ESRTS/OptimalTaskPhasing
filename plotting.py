@@ -234,12 +234,12 @@ def plot(dataFolder, dstFolder, start, stop, step):
     for length in range(start, stop+1, step):   # Read data from CSV files. 
         data.extend(readDataFrameRatio(dataFolder, length))
 
-    df = pd.DataFrame(data, columns=['Approach', 'Chain Length', 'Optimal / Syncronous'])
+    df = pd.DataFrame(data, columns=['Approach', 'Chain Length', 'Optimal / Synchronous'])
 
     configure_mpl_for_tex()
 
     plt = sns.boxplot(x = df['Chain Length'],
-            y = df['Optimal / Syncronous'],
+            y = df['Optimal / Synchronous'],
             hue = df['Approach'], fliersize=2, linewidth=1, palette='Set2')
     #plt.set_yscale("log")
    
