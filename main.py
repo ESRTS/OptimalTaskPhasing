@@ -363,9 +363,9 @@ def main():
 
     onlyMaxHarmonic = False  # Set this flag to false to keep also chains that are not max-harmonic
     runHeuristic = False # Set this flag to enable the offset heuristic by Martinez et al.
-    experiments(123, onlyMaxHarmonic, runHeuristic)
+    #experiments(123, onlyMaxHarmonic, runHeuristic)
 
-    #caseStudy()
+    caseStudy()
 
 if __name__ == "__main__":
     main()
