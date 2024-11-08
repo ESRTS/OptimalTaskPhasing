@@ -364,6 +364,8 @@ def storeExperimentConfig(args):
     destinationFolder = args.destination
     outputPath = os.path.join("output", destinationFolder) 
 
+    os.makedirs(outputPath, exist_ok=True)    # Create output folder if it does not exist
+
     filePath = os.path.join(outputPath, 'experiment_settings.csv') 
     with open(filePath, "a") as file:
         file.write("Synthetic Experiments = " + str(args.synthetic) + "\n")
