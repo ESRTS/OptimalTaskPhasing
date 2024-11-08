@@ -187,7 +187,7 @@ def logger_thread(q, start, stop, step):
             print(row)
 
     stepChainLength = 2                         # Step between two examined chain length
-def experiments(destinationFolder, seed, onlyMaxHarmonic, runHeuristic, expCount, minChainLength, maxChainLength, stepChainLength):
+def experiments(destinationFolder, seed, onlyMaxHarmonic, runHeuristic, expCount, minChainLength, maxChainLength, stepChainLength, numCpu):
     """
     This function executes the experiments with cause-effect chains that have automotive periods. 
     The chain length is varied from minChainLength to maxChainLength, and for each setting expCount random chains are examined.
@@ -219,14 +219,12 @@ def experiments(destinationFolder, seed, onlyMaxHarmonic, runHeuristic, expCount
 
     os.makedirs(basePath, exist_ok=True)    # Create output folder if it does not exist
 
-    numCpu = psutil.cpu_count(logical=False)    #Get the number of physical CPUs
-    print("Using thread pool with " + str(numCpu - 1) + " CPUs.")
-    pool = Pool(processes=numCpu-1)    # Create a thread pool
+    print("Using thread pool with " + str(numCpu) + " CPUs.")
+    pool = Pool(processes=numCpu)    # Create a thread pool
 
     threadData = []
     m = Manager()
     q = m.Queue()
-    
 
     for length in range(minChainLength, maxChainLength+1, stepChainLength): # Each chain length
         tmp = (seed, length, basePath, expCount, onlyMaxHarmonic, runHeuristic, expPerDot, q)
@@ -386,6 +384,7 @@ def main():
     parser.add_argument("destination", help="Name of the folder to store the results.", type=str)
     parser.add_argument("-synth", "--synthetic", help="Set flag to run the experiment on synthetic chains.", action="store_true")
     parser.add_argument("-cs","--casestudy", help="Set to true to execute the case study.", action="store_true")
+    parser.add_argument("-c","--cores", help="Set the number of cores to use for the experiment.", type = int)
 
     parser.add_argument("-heur","--heuristic", help="Set to true to enable the offset heuristic of Martinez et al. TCAD'18 (long runtime).", action="store_true")
     parser.add_argument("-min","--minlength", help="Minimum length of generated chains.", type=int)
@@ -400,6 +399,10 @@ def main():
     destinationFolder = args.destination                 # Subfolder name to store the experiments results at
     runSyntheticExperiments = args.synthetic             # Set flag to run the experiment on synthetic chains
     runCaseStudy = args.casestudy                        # Set to true to execute the case study
+
+    numCpu = psutil.cpu_count(logical=False) - 1         # Get the number of physical CPUs. We use all but one for the experiment by default
+    if args.cores is not None:
+        numCpu = min(numCpu, args.cores)
 
     if runSyntheticExperiments:
 
@@ -432,7 +435,7 @@ def main():
             print("--incrementlength is mandatory for syntehtic experiments.")
             return
 
-        experiments(destinationFolder, 123, onlyMaxHarmonic, runHeuristic, expCount, minChainLength, maxChainLength, stepChainLength)
+        experiments(destinationFolder, 123, onlyMaxHarmonic, runHeuristic, expCount, minChainLength, maxChainLength, stepChainLength, numCpu)
 
     if runCaseStudy:
         caseStudy(destinationFolder)
