@@ -11,6 +11,7 @@ from datetime import datetime
 import os
 import shutil
 import psutil
+import argparse
 from multiprocessing import Pool, Manager
 import threading
 
@@ -185,7 +186,8 @@ def logger_thread(q, start, stop, step):
         for row in data:
             print(row)
 
-def experiments(seed, onlyMaxHarmonic, runHeuristic):
+    stepChainLength = 2                         # Step between two examined chain length
+def experiments(destinationFolder, seed, onlyMaxHarmonic, runHeuristic, expCount, minChainLength, maxChainLength, stepChainLength):
     """
     This function executes the experiments with cause-effect chains that have automotive periods. 
     The chain length is varied from minChainLength to maxChainLength, and for each setting expCount random chains are examined.
@@ -194,24 +196,22 @@ def experiments(seed, onlyMaxHarmonic, runHeuristic):
     expStart = datetime.now()
     print("Start at:", expStart.strftime("%d/%m/%Y %H:%M:%S"))
 
-    if onlyMaxHarmonic:
-        print("Experiment: Max. Harmonic Chains")
+    # if onlyMaxHarmonic:
+    #     print("Experiment: Max. Harmonic Chains")
         
-        # Paths to write files to
-        basePath = "output/expMaxHarmonic"      # Experiment data is stored here
-        dstPath = "plots/maxHarmonic"           # Final plots are stored here
-    else:
-        print("Experiment: Semi Harmonic Chains")
+    #     # Paths to write files to
+    #     basePath = "output/expMaxHarmonic"      # Experiment data is stored here
+    #     dstPath = "plots/maxHarmonic"           # Final plots are stored here
+    # else:
+    #     print("Experiment: Semi Harmonic Chains")
 
-        # Paths to write files to
-        basePath = "output/expSemiHarmonic"     # Experiment data is stored here
-        dstPath = "plots/semiHarmonic"          # Final plots are stored here
-    
-    # Experiment Configuration
-    expCount = 100                              # Number of experiments for each configuration and data point
-    minChainLength = 2                          # Minimum length of generated chains
-    maxChainLength = 30                          # Maximum length of generated chains
-    stepChainLength = 2                         # Step between two examined chain length
+    #     # Paths to write files to
+    #     basePath = "output/expSemiHarmonic"     # Experiment data is stored here
+    #     dstPath = "plots/semiHarmonic"          # Final plots are stored here
+
+    outputPath = os.path.join("output", destinationFolder) 
+    basePath = os.path.join(outputPath, "data") 
+    dstPath = os.path.join(outputPath, "plots") 
 
     # Configuration for the crude progress bar (no need to change, only visual effect. No effect on experiment itself)
     progressDotsMax = 50                    # Config for the length of the crude progress bar
@@ -248,11 +248,11 @@ def experiments(seed, onlyMaxHarmonic, runHeuristic):
     expDuration = expFinish - expStart
     print("Duration:", expDuration)
 
-def caseStudy():
+def caseStudy(dstPath):
     """ Run the two configurations of the Autonomous Emergency Braking System (AEBS)
     """
-    basePath = os.path.join('output', 'caseStudy')  # Experiment data is stored here
-    dstPath = os.path.join('plots', 'caseStudy')    # Final plots are stored here
+    basePath = os.path.join('output', dstPath)  # Experiment data is stored here
+    dstPath = os.path.join('plots', dstPath)    # Final plots are stored here
 
     # If there exists a folder for the case-study data it is removed here to have consistent results stored
     if os.path.exists(basePath) and os.path.isdir(basePath):
@@ -303,7 +303,7 @@ def caseStudy():
     print("Ours Optimal: " + chainString(chain) + " => Latency = " + printTime(opt))
     assert heur == opt
 
-    filePath = basePath + '/case_study_harmonic.csv'
+    filePath = os.path.join(basePath, 'case_study_harmonic.csv') 
     with open(filePath, "a") as file:
         file.write(str(heur) + "," + "{:.6f}".format(durationHeuristic * 1000) + "," + str(opt) + "," + "{:.6f}".format(durationOptimal * 1000) )
         file.close()
@@ -353,19 +353,91 @@ def caseStudy():
     print("Ours Optimal: " + chainString(chain) + " => Latency = " + printTime(opt))
     assert heur == opt
 
-    filePath = basePath + '/case_study_semiharmonic.csv'
+    filePath = os.path.join(basePath, 'case_study_semiharmonic.csv') 
     with open(filePath, "a") as file:
         file.write(str(heur) + "," + "{:.6f}".format(durationHeuristic * 1000) + "," + str(opt) + "," + "{:.6f}".format(durationOptimal * 1000) )
         file.close()
-        
+
+def storeExperimentConfig(args):
+    """ This function creates a text file with all configuration options set.  
+        The file will be stored in the main folder of the experiment configuration.
+        This is to keep track of the used configurations. """ 
+    
+    destinationFolder = args.destination
+    outputPath = os.path.join("output", destinationFolder) 
+
+    filePath = os.path.join(outputPath, 'experiment_settings.csv') 
+    with open(filePath, "a") as file:
+        file.write("Synthetic Experiments = " + str(args.synthetic) + "\n")
+        file.write("Case-Study = " + str(args.casestudy) + "\n")
+        file.write("Minimum Chain Length = " + str(args.minlength) + "\n")
+        file.write("Maximyum Chain Length = " + str(args.maxlength) + "\n")
+        file.write("Step Chain Length = " + str(args.incrementlength) + "\n")
+        file.write("Heuristic = " + str(args.heuristic) + "\n")
+        file.write("Experiment Count = " + str(args.experimentCount) + "\n")
+        file.close()
+
 def main():
     os.system('cls' if os.name == 'nt' else 'clear')    # Clear the terminal
 
-    onlyMaxHarmonic = False  # Set this flag to false to keep also chains that are not max-harmonic
-    runHeuristic = False # Set this flag to enable the offset heuristic by Martinez et al.
-    #experiments(123, onlyMaxHarmonic, runHeuristic)
+    # Setup the arguments for the experiment program.
+    parser = argparse.ArgumentParser()
 
-    caseStudy()
+    parser.add_argument("destination", help="Name of the folder to store the results.", type=str)
+    parser.add_argument("-synth", "--synthetic", help="Set flag to run the experiment on synthetic chains.", action="store_true")
+    parser.add_argument("-cs","--casestudy", help="Set to true to execute the case study.", action="store_true")
+
+    parser.add_argument("-heur","--heuristic", help="Set to true to enable the offset heuristic of Martinez et al. TCAD'18 (long runtime).", action="store_true")
+    parser.add_argument("-min","--minlength", help="Minimum length of generated chains.", type=int)
+    parser.add_argument("-max","--maxlength", help="Maximum length of generated chains.", type=int)
+    parser.add_argument("-inc","--incrementlength", help="Step between two examined chain length.", type=int)
+    parser.add_argument("-exp","--experimentCount", help="Number of experiments for each configuration and data point.", type=int)
+
+    args = parser.parse_args()
+
+    # Experiment Configuration
+
+    destinationFolder = args.destination                 # Subfolder name to store the experiments results at
+    runSyntheticExperiments = args.synthetic             # Set flag to run the experiment on synthetic chains
+    runCaseStudy = args.casestudy                        # Set to true to execute the case study
+
+    if runSyntheticExperiments:
+
+        
+        # Configuration for the synthetic experiments
+        onlyMaxHarmonic = False                         # Set this flag to false to keep also chains that are not max-harmonic
+        runHeuristic = args.heuristic                   # Set this flag to enable the offset heuristic by Martinez et al.  
+
+        if args.experimentCount is not None:
+            expCount = args.experimentCount             # Number of experiments for each configuration and data point
+        else:
+            print("--experimentCount is mandatory for syntehtic experiments.")
+            return
+
+        if args.minlength is not None:
+            minChainLength = args.minlength             # Minimum length of generated chains
+        else:
+            print("--minlength is mandatory for syntehtic experiments.")
+            return
+
+        if args.maxlength is not None:
+            maxChainLength = args.maxlength             # Maximum length of generated chains
+        else:
+            print("--maxlength is mandatory for syntehtic experiments.")
+            return
+
+        if args.incrementlength is not None: 
+            stepChainLength = args.incrementlength      # Step between two examined chain length
+        else:
+            print("--incrementlength is mandatory for syntehtic experiments.")
+            return
+
+        experiments(destinationFolder, 123, onlyMaxHarmonic, runHeuristic, expCount, minChainLength, maxChainLength, stepChainLength)
+
+    if runCaseStudy:
+        caseStudy(destinationFolder)
+
+    storeExperimentConfig(args) # Store the experiment configuration for traceability
 
 if __name__ == "__main__":
     main()
