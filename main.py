@@ -375,6 +375,10 @@ def storeExperimentConfig(args):
         file.write("Step Chain Length = " + str(args.incrementlength) + "\n")
         file.write("Heuristic = " + str(args.heuristic) + "\n")
         file.write("Experiment Count = " + str(args.experimentCount) + "\n")
+        if args.seed is not None:
+            file.write("Seed = " + str(args.seed) + "\n")
+        else:
+            file.write("Seed = 123\n")
         file.close()
 
 def main():
