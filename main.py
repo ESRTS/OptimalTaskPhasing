@@ -393,6 +393,7 @@ def main():
     parser.add_argument("-max","--maxlength", help="Maximum length of generated chains.", type=int)
     parser.add_argument("-inc","--incrementlength", help="Step between two examined chain length.", type=int)
     parser.add_argument("-exp","--experimentCount", help="Number of experiments for each configuration and data point.", type=int)
+    parser.add_argument("-sed","--seed", help="Seed for the random number generator.", type=int)
 
     args = parser.parse_args()
 
@@ -437,7 +438,12 @@ def main():
             print("--incrementlength is mandatory for syntehtic experiments.")
             return
 
-        experiments(destinationFolder, 123, onlyMaxHarmonic, runHeuristic, expCount, minChainLength, maxChainLength, stepChainLength, numCpu)
+        if args.seed is not None:
+            seed = args.seed
+        else:
+            seed = 123  # Default Seed
+
+        experiments(destinationFolder, seed, onlyMaxHarmonic, runHeuristic, expCount, minChainLength, maxChainLength, stepChainLength, numCpu)
 
     if runCaseStudy:
         caseStudy(destinationFolder)
