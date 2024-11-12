@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import csv
 import os
+import argparse
 
 def configure_mpl_for_tex():
     "Configures matplotlib for LaTeX embedding"
@@ -44,6 +45,38 @@ def configure_mpl_for_tex():
     }
     mpl.rcParams.update(settings)
 
+def getMinRuntimeOurs(dataFolder, length):
+    minRuntime = 100
+    filename = dataFolder + "/length_" + str(length) + ".csv"
+    with open(filename,'r') as csvfile: 
+        data = csv.reader(csvfile, delimiter = ',') 
+        for row in data: 
+            runtime = float((row[4]))
+            if minRuntime > runtime:
+                minRuntime = runtime
+    return minRuntime
+
+def getMaxRuntimeOurs(dataFolder, length):
+    maxRuntime = 0
+    filename = dataFolder + "/length_" + str(length) + ".csv"
+    with open(filename,'r') as csvfile: 
+        data = csv.reader(csvfile, delimiter = ',') 
+        for row in data: 
+            runtime = float((row[4]))
+            if maxRuntime < runtime:
+                maxRuntime = runtime
+    return maxRuntime
+
+def getAvrgRuntimeOurs(dataFolder, length):
+    runtime = []
+    filename = dataFolder + "/length_" + str(length) + ".csv"
+    with open(filename,'r') as csvfile: 
+        data = csv.reader(csvfile, delimiter = ',') 
+        for row in data: 
+            runtime.append(float((row[4])))
+
+    return np.average(runtime)
+
 def readDataFrameIndividual(dataFolder, length):
     """ Reads the data for individual appraoches. """
     outputData = []
@@ -58,7 +91,13 @@ def readDataFrameIndividual(dataFolder, length):
             #outputData.append(['OFFSET_EXP', length, float((row[5])), float((row[6]))])
             outputData.append(['Random Phasing', length, float((row[9])), float((row[10]))])
             outputData.append(['Martinez_Latency', length, float((row[11])), float((row[12]))])
-            outputData.append(['Martinez_Heuristic', length, float((row[13])), float((row[14]))])
+            if float((row[13])) > 0:    # If the heuristic is not executed in the experiment config a value of -1 is written
+                outputData.append(['Heuristic [27]', length, float((row[13])), float((row[14]))])
+            else:
+                martinezAnalysisDur = float((row[11]))
+                combinations = int(row[15]) # Number of combinations to check
+
+                outputData.append(['Heuristic Est. [27]', length, 0.0, combinations * martinezAnalysisDur])
             assert row[3] == row[5]
     
     return outputData
@@ -175,6 +214,32 @@ def getImprovementForChainLength(dataFolder, length) :
     
     return np.average(imp)
 
+def getMaxImprovementForChainLength(dataFolder, length) :
+    filename = dataFolder + "/length_" + str(length) + ".csv"
+    maxImp = 100000
+    with open(filename,'r') as csvfile: 
+            data = csv.reader(csvfile, delimiter = ',') 
+            for row in data: 
+                sync = float((row[1]))
+                opt = float((row[3]))
+                imp = opt/sync
+                if imp < maxImp:
+                    maxImp = imp
+    return maxImp
+
+def getMinImprovementForChainLength(dataFolder, length) :
+    filename = dataFolder + "/length_" + str(length) + ".csv"
+    min = 0
+    with open(filename,'r') as csvfile: 
+            data = csv.reader(csvfile, delimiter = ',') 
+            for row in data: 
+                sync = float((row[1]))
+                opt = float((row[3]))
+                imp = opt/sync
+                if imp > min:
+                    min = imp
+    return min
+
 def plot(dataFolder, dstFolder, start, stop, step):
     """ Create plotw for the files in the dataFolder. """
     expName = dataFolder.split('/')[-1]
@@ -213,13 +278,28 @@ def plot(dataFolder, dstFolder, start, stop, step):
     indexAge = df[ (df['Approach'] == 'Random Phasing') ].index
     df.drop(indexAge , inplace=True)
 
+    indexAge = df[ (df['Approach'] == 'Syncronous Release') ].index
+    df.drop(indexAge , inplace=True)
+
+    indexAge = df[ (df['Approach'] == 'Worst-Case Phasing') ].index
+    df.drop(indexAge , inplace=True)
+
+    indexAge = df[ (df['Approach'] == 'Martinez_Latency') ].index
+    df.drop(indexAge , inplace=True)
+
+    indexAge = df[ (df['Approach'] == 'Heuristic [27]') ].index
+    df.drop(indexAge , inplace=True)
+
+    #indexAge = df[ (df['Approach'] == 'Heuristic Est. [27]') ].index
+    #df.drop(indexAge , inplace=True)
+
     plt = sns.boxplot(x = df['Chain Length'],
             y = df['Computation Time [s]'],
             hue = df['Approach'], fliersize=2, linewidth=1, palette='Set2')
     plt.set_yscale("log")
    
     plt.legend(ncol=2, loc="upper left")
-    plt.set_ylim(top=100)
+    #plt.set_ylim(top=100)
 
     plt.figure.savefig(dstFolder + "/AnalysisTimeComp.pdf", bbox_inches='tight')
     
@@ -291,3 +371,66 @@ def plot(dataFolder, dstFolder, start, stop, step):
     plt.figure.savefig(dstFolder + "/HeuristicCombinations.pdf", bbox_inches='tight')
     
     plt.cla()
+
+
+    print("Improvement")
+    for length in range(start, stop+1, step):
+        print("Length " + str(length) + " : " + str(getImprovementForChainLength(dataFolder, length)) + " Min: " + str(getMinImprovementForChainLength(dataFolder, length)) + " Max: " + str(getMaxImprovementForChainLength(dataFolder, length)))
+
+
+    print("Runtime Ours")
+    for length in range(start, stop+1, step):
+        print("Length " + str(length) + " : " + "{:.6f}".format(getAvrgRuntimeOurs(dataFolder, length)) + " Min: " + "{:.6f}".format(getMinRuntimeOurs(dataFolder, length)) + " Max: " + "{:.6f}".format(getMaxRuntimeOurs(dataFolder, length)))
+
+def main():
+    os.system('cls' if os.name == 'nt' else 'clear')    # Clear the terminal
+
+    # Setup the arguments for the experiment program.
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument("destination", help="Name of the folder to store the results.", type=str)
+
+    parser.add_argument("-heur","--heuristic", help="Set to true to enable the offset heuristic of Martinez et al. TCAD'18 (long runtime).", action="store_true")
+    parser.add_argument("-min","--minlength", help="Minimum length of generated chains.", type=int)
+    parser.add_argument("-max","--maxlength", help="Maximum length of generated chains.", type=int)
+    parser.add_argument("-inc","--incrementlength", help="Step between two examined chain length.", type=int)
+    parser.add_argument("-exp","--experimentCount", help="Number of experiments for each configuration and data point.", type=int)
+
+    args = parser.parse_args()
+
+    # Experiment Configuration
+
+    destinationFolder = args.destination                 # Subfolder name to store the experiments results at              
+
+        
+    # Configuration for the synthetic experiments
+    onlyMaxHarmonic = False                         # Set this flag to false to keep also chains that are not max-harmonic
+    runHeuristic = args.heuristic                   # Set this flag to enable the offset heuristic by Martinez et al.  
+
+    if args.minlength is not None:
+        minChainLength = args.minlength             # Minimum length of generated chains
+    else:
+        print("--minlength is mandatory for syntehtic experiments.")
+        return
+
+    if args.maxlength is not None:
+            maxChainLength = args.maxlength             # Maximum length of generated chains
+    else:
+        print("--maxlength is mandatory for syntehtic experiments.")
+        return
+
+    if args.incrementlength is not None: 
+        stepChainLength = args.incrementlength      # Step between two examined chain length
+    else:
+        print("--incrementlength is mandatory for syntehtic experiments.")
+        return
+
+    outputPath = os.path.join("output", destinationFolder) 
+    basePath = os.path.join(outputPath, "data") 
+    dstPath = os.path.join(outputPath, "plots") 
+
+    plot(basePath, dstPath, minChainLength, maxChainLength, stepChainLength)
+
+if __name__ == '__main__':
+
+    main()  # CLI to setup the plot parameters and data files

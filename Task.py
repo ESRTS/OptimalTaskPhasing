@@ -62,7 +62,8 @@ def generateRandomTasks(count, utilization):
         id += 1
 
     frac, i = math.modf(tasksetUtilization(tasks) * 100)
-    assert (i == utilization * 100)   # Make sure the utilization is correct on two decimals
+    # Commented the check since we only need periods.
+    #assert (i == utilization * 100)   # Make sure the utilization is correct on two decimals
 
     return tasks
 
