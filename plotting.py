@@ -7,10 +7,12 @@ import seaborn as sns
 import pandas as pd
 import matplotlib as mpl
 import matplotlib.pyplot as plt
+from matplotlib.patches import Rectangle
 import numpy as np
 import csv
 import os
 import argparse
+from pathlib import Path
 
 def configure_mpl_for_tex():
     "Configures matplotlib for LaTeX embedding"
@@ -82,6 +84,11 @@ def readDataFrameIndividual(dataFolder, length):
     outputData = []
 
     filename = dataFolder + "/length_" + str(length) + ".csv"
+
+    pFilename = Path(filename)
+    if pFilename.is_file() is False:
+        return None
+
     with open(filename,'r') as csvfile: 
         data = csv.reader(csvfile, delimiter = ',') 
         for row in data: 
@@ -92,12 +99,12 @@ def readDataFrameIndividual(dataFolder, length):
             outputData.append(['Random Phasing', length, float((row[9])), float((row[10]))])
             outputData.append(['Martinez_Latency', length, float((row[11])), float((row[12]))])
             if float((row[13])) > 0:    # If the heuristic is not executed in the experiment config a value of -1 is written
-                outputData.append(['Heuristic [27]', length, float((row[13])), float((row[14]))])
-            else:
-                martinezAnalysisDur = float((row[11]))
-                combinations = int(row[15]) # Number of combinations to check
+                outputData.append(['SOTA Heuristic [27]', length, float((row[13])), float((row[14]))])
+            
+            martinezAnalysisDur = float((row[11]))
+            combinations = int(row[15]) # Number of combinations to check
+            outputData.append(['Heuristic Est. [27]', length, 0.0, combinations * martinezAnalysisDur])
 
-                outputData.append(['Heuristic Est. [27]', length, 0.0, combinations * martinezAnalysisDur])
             assert row[3] == row[5]
     
     return outputData
@@ -107,11 +114,37 @@ def readDataFrameRatio(dataFolder, length):
     outputData = []
 
     filename = dataFolder + "/length_" + str(length) + ".csv"
+
+    pFilename = Path(filename)
+    if pFilename.is_file() is False:
+        return None
+    
     with open(filename,'r') as csvfile: 
         data = csv.reader(csvfile, delimiter = ',') 
         for row in data: 
             outputData.append(['Improvement', length, float((row[3])) / float((row[1]))])
     
+    return outputData
+
+def readMaxHarmRatio(dataFolder, length):
+    total = 0
+    maxHarm = 0
+
+    filename = dataFolder + "/length_" + str(length) + ".csv"
+    with open(filename,'r') as csvfile: 
+        data = csv.reader(csvfile, delimiter = ',') 
+        for row in data: 
+            if row[16] == 'False':
+                maxHarm = maxHarm + 1
+            total = total + 1
+
+    return maxHarm
+
+def readMaxHarmRatioData(dataFolder, start, stop, step):
+    outputData = []
+    for length in range(start, stop+1, step):   # Read data from CSV files.
+        outputData.append(readMaxHarmRatio(dataFolder, length))
+
     return outputData
 
 def readOffsetHeuristicData(dataFolder, start, stop, step):
@@ -247,25 +280,43 @@ def plot(dataFolder, dstFolder, start, stop, step):
     print("Generating Plots for data " + expName)
 
     data = []
+    gap = False
+    xOrder = []
+    xTicksLabels = []
+    gaps = []
 
+    #['Worst-Case Phasing', length, float((row[7])), float((row[8]))])  
     for length in range(start, stop+1, step):   # Read data from CSV files. 
-        data.extend(readDataFrameIndividual(dataFolder, length))
+        tmp = readDataFrameIndividual(dataFolder, length)
+        if tmp is not None:
+            if gap is True:
+                xOrder.append(length-1) # Since there was a gap before at least this one does not exist
+                xTicksLabels.append('...')
+                gaps.append(len(xTicksLabels))
+            xOrder.append(length)
+            xTicksLabels.append(str(length))
+            gap = False
+            data.extend(tmp)
+        else:
+            gap = True
 
-    df = pd.DataFrame(data, columns=['Approach', 'Chain Length', 'Latency [$H$]', 'Computation Time [s]'])
+    df = pd.DataFrame(data, columns=['Approach', 'Cause-Effect Chain Length', 'Latency [$H$]', 'Runtime [s]'])
 
     ######################################################################################################
     # BOXPLOT comparing latency of sync approach to optimal phasing
     ######################################################################################################
     configure_mpl_for_tex()
 
-    plt = sns.boxplot(x = df['Chain Length'],
+    plt = sns.boxplot(x = df['Cause-Effect Chain Length'],
             y = df['Latency [$H$]'],
-            hue = df['Approach'], fliersize=2, linewidth=1, palette='Set2')
+            hue = df['Approach'], fliersize=2, linewidth=1, palette='Set2', order=xOrder)
     #plt.set_yscale("log")
    
     plt.legend(loc="upper left")
     #plt.set(ylim=(0, 2))
     
+    plt.set_xticklabels(xTicksLabels)
+
     plt.figure.savefig(dstFolder + "/LatencyComp.pdf", bbox_inches='tight')
     
     plt.cla()
@@ -287,18 +338,30 @@ def plot(dataFolder, dstFolder, start, stop, step):
     indexAge = df[ (df['Approach'] == 'Martinez_Latency') ].index
     df.drop(indexAge , inplace=True)
 
-    indexAge = df[ (df['Approach'] == 'Heuristic [27]') ].index
-    df.drop(indexAge , inplace=True)
-
-    #indexAge = df[ (df['Approach'] == 'Heuristic Est. [27]') ].index
+    #indexAge = df[ (df['Approach'] == 'Heuristic [27]') ].index
     #df.drop(indexAge , inplace=True)
 
-    plt = sns.boxplot(x = df['Chain Length'],
-            y = df['Computation Time [s]'],
-            hue = df['Approach'], fliersize=2, linewidth=1, palette='Set2')
+    indexAge = df[ (df['Approach'] == 'Heuristic Est. [27]') ].index
+    df.drop(indexAge , inplace=True)
+    
+    plt = sns.boxplot(x = df['Cause-Effect Chain Length'],
+            y = df['Runtime [s]'],
+            hue = df['Approach'], fliersize=2, linewidth=1, palette='Set2', order=xOrder)
     plt.set_yscale("log")
    
-    plt.legend(ncol=2, loc="upper left")
+    plt.set_xticklabels(xTicksLabels)
+
+    plt.legend(ncol=1, loc="upper right")
+
+    d = .015
+    p = 0.01
+    
+    kwargs = dict(transform=plt.transAxes, clip_on=False)
+    
+    for i in gaps:
+        xpos = (1 / (len(xTicksLabels) + 0.5)) * i
+        plt.plot((xpos-0.001, xpos-0.001), (0, -0.05), **kwargs, linewidth=2, color = 'w')    # This overwrites the tick mark
+    
     #plt.set_ylim(top=100)
 
     plt.figure.savefig(dstFolder + "/AnalysisTimeComp.pdf", bbox_inches='tight')
@@ -312,21 +375,36 @@ def plot(dataFolder, dstFolder, start, stop, step):
     data = []
 
     for length in range(start, stop+1, step):   # Read data from CSV files. 
-        data.extend(readDataFrameRatio(dataFolder, length))
+        tmp = readDataFrameRatio(dataFolder, length)
 
-    df = pd.DataFrame(data, columns=['Approach', 'Chain Length', 'Optimal / Synchronous'])
+        if tmp is not None:
+            data.extend(tmp)
+
+    df = pd.DataFrame(data, columns=['Approach', 'Cause-Effect Chain Length', 'Optimal / Synchronous'])
 
     configure_mpl_for_tex()
 
-    plt = sns.boxplot(x = df['Chain Length'],
+    plt = sns.boxplot(x = df['Cause-Effect Chain Length'],
             y = df['Optimal / Synchronous'],
-            hue = df['Approach'], fliersize=2, linewidth=1, palette='Set2')
+            hue = df['Approach'], fliersize=2, linewidth=1, palette='Set2', order=xOrder)
     #plt.set_yscale("log")
    
     plt.get_legend().remove()
+
+    plt.set_xticklabels(xTicksLabels)
+
     #plt.legend(ncol=2, loc="upper left")
     #plt.set(ylim=(0, 2))
     
+    d = .015
+    p = 0.01
+    
+    kwargs = dict(transform=plt.transAxes, clip_on=False)
+    
+    for i in gaps:
+        xpos = (1 / (len(xTicksLabels) + 1)) * i
+        plt.plot((xpos-0.001, xpos-0.001), (0, -0.05), **kwargs, linewidth=4, color = 'w')    # This overwrites the tick mark
+
     plt.figure.savefig(dstFolder + "/LatencyReduction.pdf", bbox_inches='tight')
     
     plt.cla()
@@ -335,53 +413,58 @@ def plot(dataFolder, dstFolder, start, stop, step):
     # Lineplot comparing different latency values
     ######################################################################################################
     
-    #data = readAverageValues(dataFolder, start, stop, step)
-    data = readAverageValuesGeometric(dataFolder, start, stop, step)
+    #data = readAverageValuesGeometric(dataFolder, start, stop, step)
    
-    df = pd.DataFrame(data, columns=['Approach', 'Average Latency [$H$]', 'Chain Length'])
+    #df = pd.DataFrame(data, columns=['Approach', 'Average Latency [$H$]', 'Cause-Effect Chain Length'])
 
-    configure_mpl_for_tex()
-    g = sns.lineplot(data = df, x = 'Chain Length', y = 'Average Latency [$H$]', hue='Approach', palette='Set2')
+    #configure_mpl_for_tex()
+    #g = sns.lineplot(data = df, x = 'Cause-Effect Chain Length', y = 'Average Latency [$H$]', hue='Approach', palette='Set2')
 
-    g.legend_.set_title(None)
+    #g.legend_.set_title(None)
 
-    plt.figure.savefig(dstFolder + "/AvrgLatencyComp.pdf", bbox_inches='tight')
+    #plt.figure.savefig(dstFolder + "/AvrgLatencyComp.pdf", bbox_inches='tight')
     
-    plt.cla()
+    #plt.cla()
 
     ######################################################################################################
     # Boxplot for the phasing combinations to check by the heuristic of Martinez et al.
     ######################################################################################################
 
-    data = readOffsetHeuristicData(dataFolder, start, stop, step)
+    #data = readOffsetHeuristicData(dataFolder, start, stop, step)
 
-    df = pd.DataFrame(data, columns=['Approach', 'Chain Length', 'Phase Combinations'])
+    #df = pd.DataFrame(data, columns=['Approach', 'Cause-Effect Chain Length', 'Phase Combinations'])
 
-    configure_mpl_for_tex()
+    #configure_mpl_for_tex()
 
-    plt = sns.boxplot(x = df['Chain Length'],
-            y = df['Phase Combinations'],
-            hue = df['Approach'], fliersize=2, linewidth=1, palette='Set2')
-    plt.set_yscale("log")
+    #plt = sns.boxplot(x = df['Cause-Effect Chain Length'],
+    #        y = df['Phase Combinations'],
+    #        hue = df['Approach'], fliersize=2, linewidth=1, palette='Set2')
+    #plt.set_yscale("log")
    
-    plt.get_legend().remove()
-    #plt.legend(ncol=2, loc="upper left")
-    #plt.set(ylim=(0, 2))
+    #plt.get_legend().remove()
+    ##plt.legend(ncol=2, loc="upper left")
+    ##plt.set(ylim=(0, 2))
     
-    plt.figure.savefig(dstFolder + "/HeuristicCombinations.pdf", bbox_inches='tight')
+    #plt.figure.savefig(dstFolder + "/HeuristicCombinations.pdf", bbox_inches='tight')
     
-    plt.cla()
+    #plt.cla()
 
 
-    print("Improvement")
-    for length in range(start, stop+1, step):
-        print("Length " + str(length) + " : " + str(getImprovementForChainLength(dataFolder, length)) + " Min: " + str(getMinImprovementForChainLength(dataFolder, length)) + " Max: " + str(getMaxImprovementForChainLength(dataFolder, length)))
+    #print("Improvement")
+    #for length in range(start, stop+1, step):
+    #    print("Length " + str(length) + " : " + str(getImprovementForChainLength(dataFolder, length)) + " Min: " + str(getMinImprovementForChainLength(dataFolder, length)) + " Max: " + str(getMaxImprovementForChainLength(dataFolder, length)))
 
 
-    print("Runtime Ours")
-    for length in range(start, stop+1, step):
-        print("Length " + str(length) + " : " + "{:.6f}".format(getAvrgRuntimeOurs(dataFolder, length)) + " Min: " + "{:.6f}".format(getMinRuntimeOurs(dataFolder, length)) + " Max: " + "{:.6f}".format(getMaxRuntimeOurs(dataFolder, length)))
+    #print("Runtime Ours")
+    #for length in range(start, stop+1, step):
+    #    print("Length " + str(length) + " : " + "{:.6f}".format(getAvrgRuntimeOurs(dataFolder, length)) + " Min: " + "{:.6f}".format(getMinRuntimeOurs(dataFolder, length)) + " Max: " + "{:.6f}".format(getMaxRuntimeOurs(dataFolder, length)))
 
+    #print("Max-Harmonic Ratio")
+    #for length in range(start, stop+1, step):
+    #    print("Length " + str(length) + " : " + "{:.6f}".format(readMaxHarmRatio(dataFolder, length)))
+
+
+    
 def main():
     os.system('cls' if os.name == 'nt' else 'clear')    # Clear the terminal
 
