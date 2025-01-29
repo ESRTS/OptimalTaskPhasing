@@ -43,11 +43,13 @@ def optimalPhasingSemiHarm(chain):
     max1Period = getMaxPeriod(chain)    # Get the largest task period
     max2Period = getMax2Period(chain)   # Get the secod largest period
 
-    if not((max1Period == mseconds(5) and max2Period == mseconds(2)) or (max1Period == mseconds(50) and max2Period == mseconds(20))):
+    if is2kMaxHarmonic(chain) == False:
+    #if not((max1Period == mseconds(5) and max2Period == mseconds(2)) or (max1Period == mseconds(50) and max2Period == mseconds(20))):
         print("max1Period: " + printTime(max1Period))
         print("max2Period: " + printTime(max2Period))
 
-    assert (max1Period == mseconds(5) and max2Period == mseconds(2)) or (max1Period == mseconds(50) and max2Period == mseconds(20)) # Make sure the chain has semi harmonic automotive periods!
+    assert is2kMaxHarmonic(chain)
+  #  assert (max1Period == mseconds(5) and max2Period == mseconds(2)) or (max1Period == mseconds(50) and max2Period == mseconds(20)) # Make sure the chain has semi harmonic automotive periods!
     
     # Compute tasks where periods switch between max1 and max2
     nu = getPeriodSwitches(chain) 

@@ -249,7 +249,21 @@ def createCombinationsRec(chain, pos, prevLcm, graph, node, offsetGranularity):
                 bestOffset = ret
 
     return bestOffset
-            
+
+def getMaxDeltaHeuristic(chain):
+    '''
+    Compute the largest delta t the heuristic needs to explore. 
+    '''   
+
+    periods = []
+
+    # Get all individual task periods
+    for task in chain:
+        if task.period not in periods:
+            periods.append(task.period)
+
+    return math.gcd(*periods)
+
 if __name__ == '__main__':
     """ Debugging """
     os.system('cls' if os.name == 'nt' else 'clear')    # Clear the terminal
@@ -338,7 +352,7 @@ if __name__ == '__main__':
     task1 = Task('Task1', useconds(1), mseconds(20), mseconds(20), 0)
     task2 = Task('Task2', useconds(1), mseconds(50), mseconds(50), 0)
     task3 = Task('Task3', useconds(1), mseconds(20), mseconds(20), 0)
-    task4 = Task('Task1', useconds(1), mseconds(50), mseconds(50), 0)
+    task4 = Task('Task4', useconds(1), mseconds(50), mseconds(50), 0)
 
     start = timer()
     opt = optimalPhasingSemiHarm(chain)
@@ -350,6 +364,53 @@ if __name__ == '__main__':
 
     print("Ours Optimal: " + chainString(chain) + " => Latency = " + printTime(opt))
     assert heur == opt
+
+    # Testing non-automotive periods
+    print("\n=====================================================================================")
+    print("= Non-Automotive Periods")
+    print("=====================================================================================")
+    task1 = Task('Task1', useconds(1), mseconds(189), mseconds(189), 0)
+    task2 = Task('Task2', useconds(1), mseconds(54), mseconds(54), 0)
+    task3 = Task('Task3', useconds(1), mseconds(189), mseconds(189), 0)
+    task4 = Task('Task4', useconds(1), mseconds(54), mseconds(54), 0)
+    task5 = Task('Task5', useconds(1), mseconds(27), mseconds(27), 0)
+    chain = [task1, task2, task3, task4, task5]
+
+    combinations = combinationsHeuristic(chain, getMaxDeltaHeuristic(chain))
+
+
+    print("Case Study: " + str(combinations) + " combinations are checked with the heuristic.")
+
+    start = timer()
+    heur = heuristicOptimalPhasing(chain, getMaxDeltaHeuristic(chain))
+    duration = timer() - start
+
+    print("Heuristic: " + chainString(chain) + " => Latency = " + printTime(heur) + " in " + str(duration * 1000) + " ms")
+
+    dpt = DPT(chain)
+    dpt.getDpt()
+    print("Exact Analysis : " + chainString(chain) + " => Latency = " + printTime(dpt.maxAge))
+
+    task1 = Task('Task1', useconds(1), mseconds(189), mseconds(189), 0)
+    task2 = Task('Task2', useconds(1), mseconds(54), mseconds(54), 0)
+    task3 = Task('Task3', useconds(1), mseconds(189), mseconds(189), 0)
+    task4 = Task('Task4', useconds(1), mseconds(54), mseconds(54), 0)
+    task5 = Task('Task5', useconds(1), mseconds(27), mseconds(27), 0)
+
+    start = timer()
+    opt = optimalPhasingSemiHarm(chain)
+    duration = timer() - start
+
+    print("Optimal Latency = " + printTime(opt) + " in " + str(duration * 1000) + " ms")
+
+    print("\nMartinez Latency = " + printTime(calculateLatencyMartinezTCAD18(chain)))
+
+    print("Ours Optimal: " + chainString(chain) + " => Latency = " + printTime(opt))
+    
+    dpt = DPT(chain)
+    dpt.getDpt()
+    print("Exact Analysis : " + chainString(chain) + " => Latency = " + printTime(dpt.maxAge))
+
     # # Example
     # print("\n=====================================================================================")
 

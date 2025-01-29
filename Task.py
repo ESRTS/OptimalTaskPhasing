@@ -48,9 +48,10 @@ class Job:
         return "Job(%s, %s): r = %s, d = %s" % (self.task.name, self.id, printTime(self.release), printTime(self.deadline))
 
 def generateRandomTasks(count, utilization):
-    """ Function to generate a set of random tasks """
+    """ Function to generate a set of random tasks based on the automotive periods """
     tasks = []
     periods = [1, 2, 5, 10, 20, 50, 100, 200, 1000] # Periods from "Real world automotive benchmark for free" WATERS 2015
+
     utilizations = drs(count, utilization)
     id = 0
 
@@ -67,6 +68,26 @@ def generateRandomTasks(count, utilization):
 
     return tasks
 
+def generateRandomTasks2kMax(count, utilization, k, numPeriods, maxAllowedPeriod):
+    """ Function to generate a set of random tasks with (2,k)-max harmonic periods. """
+    tasks = []
+    periods = generatePeriodSet(k, numPeriods, maxAllowedPeriod)    # Generates random periods that are (2,k)-max harmonic
+    
+    utilizations = drs(count, utilization)
+    id = 0
+
+    for u in utilizations:
+        period = mseconds(random.choice(periods))
+        wcet = math.ceil((u * period) / 1)
+        
+        tasks.append(Task("Task_%s" % (id), wcet, period, period, 0))
+        id += 1
+
+    frac, i = math.modf(tasksetUtilization(tasks) * 100)
+    # Commented the check since we only need periods.
+    #assert (i == utilization * 100)   # Make sure the utilization is correct on two decimals
+
+    return tasks
 def tasksetUtilization(tasks):
     """ Function to compute the utilization of a taskset. """
     utilization = 0.0
@@ -131,28 +152,107 @@ def chainString(chain):
 
     return retval
 
+def generatePeriodSet(k, numPeriods, maxAllowedPeriod):
+    '''
+    Generates (2,k)-max harminc period sets with configurable number of periods and a bound on the maximum allowed period. 
+    '''
+    periodSets = []
+
+    # Compute all T^E_{max,2} candidates.
+    tmax2Candidates = []
+    for tmax1 in range(1,maxAllowedPeriod+1):
+        tmax2 = getTmax2(k, tmax1)
+        if tmax2 is not None:
+            tmax2Candidates.append([tmax2, tmax1])
+    
+    # For each tmax1 and tmax2, we find all possible othe rperiod values.
+    for tmax2, tmax1 in tmax2Candidates:
+
+        # This can be done nicer, just to test...
+        tmpPeriodSet = [tmax1, tmax2]
+
+        for i in range(1,(tmax1%tmax2) + 1):
+            if tmax1 % i == 0 and tmax2 % i == 0:
+                tmpPeriodSet.append(i)
+
+        if len(tmpPeriodSet) >= numPeriods:
+            periodSets.append(tmpPeriodSet)
+
+    index = random.randrange(len(periodSets))
+    set = sorted(periodSets[index], key=int)
+
+    # Now move Tmax1 and Tmax2 to the period set and fill it with random values from the remaining periods 
+    # until the required number of periods is found.
+    periods = []
+
+    periods.append(set.pop())   #Tmax1
+    periods.append(set.pop())   #Tmax2
+
+    for i in range(0,numPeriods-2): # two of the period values are already added to the set
+        index = random.randrange(len(set))
+        periods.append(set[index])
+        set.remove(set[index])
+
+    return sorted(periods, key=int)
+
+def getTmax2(k, tmax1):
+    '''
+    Computes T^E_{max,2} based on a given value of k and T^E_{max,1}.
+    If the value is not an integer, None is returned.
+    '''
+    if (2 * int(tmax1)) % int(k) == 0:
+        return int((2 * int(tmax1)) / int(k))
+    return None
+
+def is2kMaxHarmonic(tasks):
+    '''
+    Test if a set of periods is (2,k)-max harmonic.
+    '''
+
+    periods = []
+
+    # Get all individual task periods
+    for task in tasks:
+        if task.period not in periods:
+            periods.append(task.period)
+
+    sortedPeriods = sorted(periods, key=int)
+
+    max1 = sortedPeriods[len(sortedPeriods)-1]
+    max2 = sortedPeriods[len(sortedPeriods)-2]
+
+    for index in range(0, len(sortedPeriods)-2):   # don't check the two largest periods
+        if max1 % sortedPeriods[index] != 0 or max2 % sortedPeriods[index] != 0:
+            return False
+    return True
+
 if __name__ == '__main__':
     """ Debugging """
-    random.seed(123)
+    #random.seed(123)
 
-    task1 = Task('Task1', useconds(100), mseconds(100), mseconds(100), 0)
+    # task1 = Task('Task1', useconds(100), mseconds(100), mseconds(100), 0)
 
-    print(task1)
+    # print(task1)
 
-    print(task1.utilization())
+    # print(task1.utilization())
 
-    job = Job(task1, 0)
+    # job = Job(task1, 0)
 
-    jobs = task1.getJobsUntil(mseconds(500))
+    # jobs = task1.getJobsUntil(mseconds(500))
 
-    for j in jobs:
-        print(j)
+    # for j in jobs:
+    #     print(j)
 
-    tasks = generateRandomTasks(10, 1)
+    # tasks = generateRandomTasks(10, 1)
 
-    for t in tasks:
-        print(t)
+    # for t in tasks:
+    #     print(t)
 
-    print("Utilization: " , tasksetUtilization(tasks))
+    # print("Utilization: " , tasksetUtilization(tasks))
 
-    print("Max. Harmonic: " , isMaxHarmonic(tasks))
+    # print("Max. Harmonic: " , isMaxHarmonic(tasks))
+
+    for i in range(0,10000):
+        periods = generatePeriodSet(7, 5, 1000)
+
+        print(periods)

@@ -15,7 +15,7 @@ import argparse
 from multiprocessing import Pool, Manager
 import threading
 
-def runConfiguration(seed, length, basePath, expCount, onlyMaxHarmonic, runHeuristic, expPerDot, q):
+def runConfiguration(seed, length, basePath, expCount, onlyMaxHarmonic, runHeuristic, expPerDot, q, automotivePeriods, k, numPeriods):
     """ This is executed as thread and handles all experiments for one chain length. 
         Output is written to a dedicated CSV-file, and update information is sent to the logger thread.
     """
@@ -42,10 +42,17 @@ def runConfiguration(seed, length, basePath, expCount, onlyMaxHarmonic, runHeuri
             if onlyMaxHarmonic == True:
                 maxHarmonic = False
                 while maxHarmonic is False:
-                    chain = generateRandomTasks(length, 0.5)    # Utilization does not matter since we focus on LET
+                    if automotivePeriods == True:
+                        chain = generateRandomTasks(length, 0.5)        # Utilization does not matter since we focus on LET
+                    else:
+                        chain = generateRandomTasks2kMax(length, 0.5, k, numPeriods, 200)  # Utilization does not matter since we focus on LET
+
                     maxHarmonic = isMaxHarmonic(chain)          # Only keep max harmoic chains
             else:
-                chain = generateRandomTasks(length, 0.5)    # Utilization does not matter since we focus on LET
+                if automotivePeriods == True:
+                    chain = generateRandomTasks(length, 0.5)        # Utilization does not matter since we focus on LET
+                else:
+                    chain = generateRandomTasks2kMax(length, 0.5, k, numPeriods, 200)  # Utilization does not matter since we focus on LET
                 maxHarmonic = isMaxHarmonic(chain)
 
             hp = hyperperiod(chain)
@@ -108,7 +115,7 @@ def runConfiguration(seed, length, basePath, expCount, onlyMaxHarmonic, runHeuri
                 #############################
                 # Combinations Offset Heuristic
                 #############################
-                numAssignments = combinationsHeuristic(chain, mseconds(1))
+                numAssignments = combinationsHeuristic(chain, getMaxDeltaHeuristic(chain))
                     
                 #############################
                 # Offset Heuristic Martinez et al.
@@ -187,7 +194,8 @@ def logger_thread(q, start, stop, step):
             print(row)
 
     stepChainLength = 2                         # Step between two examined chain length
-def experiments(destinationFolder, seed, onlyMaxHarmonic, runHeuristic, expCount, minChainLength, maxChainLength, stepChainLength, numCpu):
+    
+def experiments(destinationFolder, seed, onlyMaxHarmonic, runHeuristic, expCount, minChainLength, maxChainLength, stepChainLength, numCpu, automotivePeriods, k, numPeriods):
     """
     This function executes the experiments with cause-effect chains that have automotive periods. 
     The chain length is varied from minChainLength to maxChainLength, and for each setting expCount random chains are examined.
@@ -216,6 +224,8 @@ def experiments(destinationFolder, seed, onlyMaxHarmonic, runHeuristic, expCount
     # Configuration for the crude progress bar (no need to change, only visual effect. No effect on experiment itself)
     progressDotsMax = 50                    # Config for the length of the crude progress bar
     expPerDot = math.floor(expCount / progressDotsMax)
+    if expPerDot == 0:
+        expPerDot = 1   # must be at least 1
 
     os.makedirs(basePath, exist_ok=True)    # Create output folder if it does not exist
 
@@ -227,7 +237,7 @@ def experiments(destinationFolder, seed, onlyMaxHarmonic, runHeuristic, expCount
     q = m.Queue()
 
     for length in range(minChainLength, maxChainLength+1, stepChainLength): # Each chain length
-        tmp = (seed, length, basePath, expCount, onlyMaxHarmonic, runHeuristic, expPerDot, q)
+        tmp = (seed, length, basePath, expCount, onlyMaxHarmonic, runHeuristic, expPerDot, q, automotivePeriods, k, numPeriods)
         threadData.append(tmp)
         #runConfiguration(seed, length, basePath, expCount, onlyMaxHarmonic, runHeuristic)
 
@@ -391,6 +401,7 @@ def main():
     parser.add_argument("-synth", "--synthetic", help="Set flag to run the experiment on synthetic chains.", action="store_true")
     parser.add_argument("-cs","--casestudy", help="Set to true to execute the case study.", action="store_true")
     parser.add_argument("-c","--cores", help="Set the number of cores to use for the experiment.", type = int)
+    parser.add_argument("-ap", "--automotivePeriods", help="Set flag to run the experiment with automotive periods.", action="store_true")
 
     parser.add_argument("-heur","--heuristic", help="Set to true to enable the offset heuristic of Martinez et al. TCAD'18 (long runtime).", action="store_true")
     parser.add_argument("-min","--minlength", help="Minimum length of generated chains.", type=int)
@@ -398,6 +409,8 @@ def main():
     parser.add_argument("-inc","--incrementlength", help="Step between two examined chain length.", type=int)
     parser.add_argument("-exp","--experimentCount", help="Number of experiments for each configuration and data point.", type=int)
     parser.add_argument("-sed","--seed", help="Seed for the random number generator.", type=int)
+    parser.add_argument("-k","--kValue", help="(2,k)-max harmonic periods.", type=int)
+    parser.add_argument("-np","--numPeriods", help="Number of periods with random (2,k)-max harmonic periods.", type=int)
 
     args = parser.parse_args()
 
@@ -413,7 +426,8 @@ def main():
 
     if runSyntheticExperiments:
 
-        
+        automotivePeriods = args.automotivePeriods
+
         # Configuration for the synthetic experiments
         onlyMaxHarmonic = False                         # Set this flag to false to keep also chains that are not max-harmonic
         runHeuristic = args.heuristic                   # Set this flag to enable the offset heuristic by Martinez et al.  
@@ -447,7 +461,23 @@ def main():
         else:
             seed = 123  # Default Seed
 
-        experiments(destinationFolder, seed, onlyMaxHarmonic, runHeuristic, expCount, minChainLength, maxChainLength, stepChainLength, numCpu)
+        if automotivePeriods is False:
+            if args.kValue is not None: 
+                k = args.kValue      # k-value of (2,k)-max harmonic periods
+            else:
+                print("--For random (2,k)-max harmonic periods, a k value needs to be specified.")
+                return
+            
+            if args.numPeriods is not None: 
+                numPeriods = args.numPeriods      # numPeriods of (2,k)-max harmonic periods
+            else:
+                print("--For random (2,k)-max harmonic periods, a numPeriods value needs to be specified.")
+                return
+        else:
+            k = 0
+            numPeriods = 0
+
+        experiments(destinationFolder, seed, onlyMaxHarmonic, runHeuristic, expCount, minChainLength, maxChainLength, stepChainLength, numCpu, automotivePeriods, k, numPeriods)
 
     if runCaseStudy:
         caseStudy(destinationFolder)
