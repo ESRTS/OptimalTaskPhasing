@@ -15,7 +15,7 @@ import argparse
 from multiprocessing import Pool, Manager
 import threading
 
-def runConfiguration(seed, length, basePath, expCount, onlyMaxHarmonic, runHeuristic, expPerDot, q, automotivePeriods, k, numPeriods):
+def runConfiguration(seed, length, basePath, expCount, onlyMaxHarmonic, runHeuristic, timeout, expPerDot, q, automotivePeriods, k, numPeriods):
     """ This is executed as thread and handles all experiments for one chain length. 
         Output is written to a dedicated CSV-file, and update information is sent to the logger thread.
     """
@@ -122,7 +122,12 @@ def runConfiguration(seed, length, basePath, expCount, onlyMaxHarmonic, runHeuri
                 #############################
                 if runHeuristic:
                     startOffsetHeuristic = timer()
-                    heuristicLatency = heuristicOptimalPhasing(chain, mseconds(1)) / hp
+                    if timeout > 0:
+                        heuristicLatency = heuristicOptimalPhasingTimeout(chain, mseconds(1), timeout)
+                        if heuristicLatency > 0:    # -1 is returned in case of a timeout
+                            heuristicLatency = heuristicLatency / hp
+                    else:
+                        heuristicLatency = heuristicOptimalPhasing(chain, mseconds(1)) / hp
                     durOffsetHeuristic = timer() - startOffsetHeuristic
                 else:
                     heuristicLatency = -1
@@ -195,7 +200,7 @@ def logger_thread(q, start, stop, step):
 
     stepChainLength = 2                         # Step between two examined chain length
     
-def experiments(destinationFolder, seed, onlyMaxHarmonic, runHeuristic, expCount, minChainLength, maxChainLength, stepChainLength, numCpu, automotivePeriods, k, numPeriods):
+def experiments(destinationFolder, seed, onlyMaxHarmonic, runHeuristic, timeout, expCount, minChainLength, maxChainLength, stepChainLength, numCpu, automotivePeriods, k, numPeriods):
     """
     This function executes the experiments with cause-effect chains that have automotive periods. 
     The chain length is varied from minChainLength to maxChainLength, and for each setting expCount random chains are examined.
@@ -237,7 +242,7 @@ def experiments(destinationFolder, seed, onlyMaxHarmonic, runHeuristic, expCount
     q = m.Queue()
 
     for length in range(minChainLength, maxChainLength+1, stepChainLength): # Each chain length
-        tmp = (seed, length, basePath, expCount, onlyMaxHarmonic, runHeuristic, expPerDot, q, automotivePeriods, k, numPeriods)
+        tmp = (seed, length, basePath, expCount, onlyMaxHarmonic, runHeuristic, timeout, expPerDot, q, automotivePeriods, k, numPeriods)
         threadData.append(tmp)
         #runConfiguration(seed, length, basePath, expCount, onlyMaxHarmonic, runHeuristic)
 
@@ -404,6 +409,7 @@ def main():
     parser.add_argument("-ap", "--automotivePeriods", help="Set flag to run the experiment with automotive periods.", action="store_true")
 
     parser.add_argument("-heur","--heuristic", help="Set to true to enable the offset heuristic of Martinez et al. TCAD'18 (long runtime).", action="store_true")
+    parser.add_argument("-to","--timeout", help="Timeout for the heuristic.", type=int)
     parser.add_argument("-min","--minlength", help="Minimum length of generated chains.", type=int)
     parser.add_argument("-max","--maxlength", help="Maximum length of generated chains.", type=int)
     parser.add_argument("-inc","--incrementlength", help="Step between two examined chain length.", type=int)
@@ -431,6 +437,11 @@ def main():
         # Configuration for the synthetic experiments
         onlyMaxHarmonic = False                         # Set this flag to false to keep also chains that are not max-harmonic
         runHeuristic = args.heuristic                   # Set this flag to enable the offset heuristic by Martinez et al.  
+
+        if args.timeout is not None:
+            timeout = args.timeout
+        else:
+            timeout = 0
 
         if args.experimentCount is not None:
             expCount = args.experimentCount             # Number of experiments for each configuration and data point
@@ -477,7 +488,7 @@ def main():
             k = 0
             numPeriods = 0
 
-        experiments(destinationFolder, seed, onlyMaxHarmonic, runHeuristic, expCount, minChainLength, maxChainLength, stepChainLength, numCpu, automotivePeriods, k, numPeriods)
+        experiments(destinationFolder, seed, onlyMaxHarmonic, runHeuristic, timeout, expCount, minChainLength, maxChainLength, stepChainLength, numCpu, automotivePeriods, k, numPeriods)
 
     if runCaseStudy:
         caseStudy(destinationFolder)
