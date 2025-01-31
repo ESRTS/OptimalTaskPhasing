@@ -70,22 +70,28 @@ def generateRandomTasks(count, utilization):
 
 def generateRandomTasks2kMax(count, utilization, k, numPeriods, maxAllowedPeriod):
     """ Function to generate a set of random tasks with (2,k)-max harmonic periods. """
-    tasks = []
-    periods = generatePeriodSet(k, numPeriods, maxAllowedPeriod)    # Generates random periods that are (2,k)-max harmonic
-    
-    utilizations = drs(count, utilization)
-    id = 0
+    generatedTasks = False
 
-    for u in utilizations:
-        period = mseconds(random.choice(periods))
-        wcet = math.ceil((u * period) / 1)
+    while(generatedTasks == False):
+        tasks = []
+        periods = generatePeriodSet(k, numPeriods, maxAllowedPeriod)    # Generates random periods that are (2,k)-max harmonic
         
-        tasks.append(Task("Task_%s" % (id), wcet, period, period, 0))
-        id += 1
+        utilizations = drs(count, utilization)
+        id = 0
 
-    frac, i = math.modf(tasksetUtilization(tasks) * 100)
-    # Commented the check since we only need periods.
-    #assert (i == utilization * 100)   # Make sure the utilization is correct on two decimals
+        for u in utilizations:
+            period = mseconds(random.choice(periods))
+            wcet = math.ceil((u * period) / 1)
+            
+            tasks.append(Task("Task_%s" % (id), wcet, period, period, 0))
+            id += 1
+
+        frac, i = math.modf(tasksetUtilization(tasks) * 100)
+        # Commented the check since we only need periods.
+        #assert (i == utilization * 100)   # Make sure the utilization is correct on two decimals
+
+        if is2kMaxHarmonic(tasks) == True:  # Double check that the generated chain is (2,k)-max harmonic
+            generatedTasks = True
 
     return tasks
 def tasksetUtilization(tasks):
@@ -222,7 +228,7 @@ def is2kMaxHarmonic(tasks):
     max2 = sortedPeriods[len(sortedPeriods)-2]
 
     for index in range(0, len(sortedPeriods)-2):   # don't check the two largest periods
-        if max1 % sortedPeriods[index] != 0 or max2 % sortedPeriods[index] != 0:
+        if max1 % sortedPeriods[index] != 0 and max2 % sortedPeriods[index] != 0:
             return False
     return True
 
@@ -253,6 +259,13 @@ if __name__ == '__main__':
     # print("Max. Harmonic: " , isMaxHarmonic(tasks))
 
     for i in range(0,10000):
-        periods = generatePeriodSet(7, 5, 1000)
+        #periods = generatePeriodSet(7, 5, 1000)
 
-        print(periods)
+        #print(periods)
+
+        tasks = generateRandomTasks2kMax(5, 0.5, 7, 5, 500) #count, utilization, k, numPeriods, maxAllowedPeriod
+        print("--------------------------")
+        for task in tasks:
+            print(str(task.period))
+        print("--------------------------")
+        assert is2kMaxHarmonic(tasks)
