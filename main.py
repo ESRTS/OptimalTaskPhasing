@@ -58,6 +58,7 @@ def runConfiguration(seed, length, basePath, expCount, onlyMaxHarmonic, runHeuri
             hp = hyperperiod(chain)
 
             if i > existingResults:                         # Only run the analysis if results don't exist yet
+
                 #############################
                 # DPT analysis 
                 #############################

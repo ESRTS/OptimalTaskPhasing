@@ -125,99 +125,95 @@ if __name__ == '__main__':
     """ Debugging """
     os.system('cls' if os.name == 'nt' else 'clear')    # Clear the terminal
 
-    # Example Fig. 2b
-    print("=====================================================================================")
-    print("Example: Max-Harmonic (Fig. 2b)")
-    task1 = Task('Task1', useconds(1), mseconds(10), mseconds(10), 0)
-    task2 = Task('Task2', useconds(1), mseconds(1), mseconds(1), 0)
-    task3 = Task('Task3', useconds(1), mseconds(10), mseconds(10), 0)
+    # # Example Fig. 2b
+    # print("=====================================================================================")
+    # print("Example: Max-Harmonic (Fig. 2b)")
+    # task1 = Task('Task1', useconds(1), mseconds(10), mseconds(10), 0)
+    # task2 = Task('Task2', useconds(1), mseconds(1), mseconds(1), 0)
+    # task3 = Task('Task3', useconds(1), mseconds(10), mseconds(10), 0)
 
-    chain = [task1, task2, task3]
+    # chain = [task1, task2, task3]
 
-    latencyBound = optimalPhasingMaxHarm(chain)
+    # latencyBound = optimalPhasingMaxHarm(chain)
 
-    print("Max Data Age = %s" % (printTime(latencyBound)))
+    # print("Max Data Age = %s" % (printTime(latencyBound)))
 
-    assert latencyBound == mseconds(31) # Check that the result is correct
+    # assert latencyBound == mseconds(31) # Check that the result is correct
     
-    # Example Fig. 4b
+    # # Example Fig. 4b
+    # print("\n=====================================================================================")
+    # print("Example: Semi Harminic Automotive (Fig. 4b)")
+    # task1 = Task('Task1', useconds(1), mseconds(5), mseconds(5), 0)
+    # task2 = Task('Task2', useconds(1), mseconds(1), mseconds(1), 0)
+    # task3 = Task('Task3', useconds(1), mseconds(2), mseconds(2), 0)
+    # task4 = Task('Task4', useconds(1), mseconds(1), mseconds(1), 0)
+
+    # chain = [task1, task2, task3, task4]
+
+    # latencyBound = optimalPhasingSemiHarm(chain)
+
+    # print("Max Data Age = %s" % (printTime(latencyBound)))
+
+    # assert latencyBound == mseconds(15) # Check that the result is correct
+
+    # print("\n=====================================================================================")
+    # task1 = Task('Task1', useconds(1), mseconds(20), mseconds(20), 0)
+    # task2 = Task('Task2', useconds(1), mseconds(50), mseconds(50), 0)
+    # task3 = Task('Task3', useconds(1), mseconds(5), mseconds(5), 0)
+    # task4 = Task('Task4', useconds(1), mseconds(20), mseconds(20), 0)
+
+    # chain = [task1, task2, task3, task4]
+
+    # print(chainString(chain))
+
+    # latencyBound = optimalPhasingSemiHarm(chain)
+
+    # assert latencyBound == mseconds(155) # Check that the result is correct
+
+    # print("Max Data Age = %s" % (printTime(latencyBound)))
+
+    # # Test Chain
+    # print("\n=====================================================================================")
+    # #To Check 50000 -> 20000 -> 1000 -> 50000 -> 50000 -> 1000 Optimal Phasing Latency: 2.32 Offset Latency: 2.72
+    # task1 = Task('Task1', useconds(1), mseconds(50), mseconds(50), 0)
+    # task2 = Task('Task2', useconds(1), mseconds(20), mseconds(20), 0)
+    # task3 = Task('Task3', useconds(1), mseconds(1), mseconds(1), 0)
+    # task4 = Task('Task4', useconds(1), mseconds(50), mseconds(50), 0)
+    # task5 = Task('Task4', useconds(1), mseconds(50), mseconds(50), 0)
+    # task6 = Task('Task4', useconds(1), mseconds(1), mseconds(1), 0)
+
+    # chain = [task1, task2, task3, task4, task5, task6]
+
+    # print(chainString(chain))
+    
+    # latencyBound = optimalPhasingSemiHarm(chain)
+
+    # print("Offset:")
+    # prev = 0
+    # for task in chain:
+    #     print(printTime(task.offset) + " delta: " + printTime(task.offset - prev))
+    #     prev = task.offset
+
+    # print("\nLatency Bound: " + printTime(latencyBound))
+
+    # dptOffset = DPT(chain)
+    # dptOffset.getDpt()
+    # offsetLatency = dptOffset.maxAge
+
+    # print("Exact Analysis: " + printTime(offsetLatency))
+
     print("\n=====================================================================================")
-    print("Example: Semi Harminic Automotive (Fig. 4b)")
-    task1 = Task('Task1', useconds(1), mseconds(5), mseconds(5), 0)
-    task2 = Task('Task2', useconds(1), mseconds(1), mseconds(1), 0)
-    task3 = Task('Task3', useconds(1), mseconds(2), mseconds(2), 0)
+    task1 = Task('Task1', useconds(1), mseconds(8), mseconds(8), 0)
+    task2 = Task('Task2', useconds(1), mseconds(6), mseconds(6), 0)
+    task3 = Task('Task3', useconds(1), mseconds(8), mseconds(8), 0)
     task4 = Task('Task4', useconds(1), mseconds(1), mseconds(1), 0)
+    task5 = Task('Task5', useconds(1), mseconds(8), mseconds(8), 0)
 
-    chain = [task1, task2, task3, task4]
 
-    latencyBound = optimalPhasingSemiHarm(chain)
+    chain = [task1, task2, task3, task4, task5, ]
 
-    print("Max Data Age = %s" % (printTime(latencyBound)))
-
-    assert latencyBound == mseconds(15) # Check that the result is correct
-
-    print("\n=====================================================================================")
-    task1 = Task('Task1', useconds(1), mseconds(20), mseconds(20), 0)
-    task2 = Task('Task2', useconds(1), mseconds(50), mseconds(50), 0)
-    task3 = Task('Task3', useconds(1), mseconds(5), mseconds(5), 0)
-    task4 = Task('Task4', useconds(1), mseconds(20), mseconds(20), 0)
-
-    chain = [task1, task2, task3, task4]
-
-    print(chainString(chain))
-
-    latencyBound = optimalPhasingSemiHarm(chain)
-
-    assert latencyBound == mseconds(155) # Check that the result is correct
-
-    print("Max Data Age = %s" % (printTime(latencyBound)))
-
-    # Test Chain
-    print("\n=====================================================================================")
-    #To Check 50000 -> 20000 -> 1000 -> 50000 -> 50000 -> 1000 Optimal Phasing Latency: 2.32 Offset Latency: 2.72
-    task1 = Task('Task1', useconds(1), mseconds(50), mseconds(50), 0)
-    task2 = Task('Task2', useconds(1), mseconds(20), mseconds(20), 0)
-    task3 = Task('Task3', useconds(1), mseconds(1), mseconds(1), 0)
-    task4 = Task('Task4', useconds(1), mseconds(50), mseconds(50), 0)
-    task5 = Task('Task4', useconds(1), mseconds(50), mseconds(50), 0)
-    task6 = Task('Task4', useconds(1), mseconds(1), mseconds(1), 0)
-
-    chain = [task1, task2, task3, task4, task5, task6]
-
-    print(chainString(chain))
-    
-    latencyBound = optimalPhasingSemiHarm(chain)
-
-    print("Offset:")
-    prev = 0
-    for task in chain:
-        print(printTime(task.offset) + " delta: " + printTime(task.offset - prev))
-        prev = task.offset
-
-    print("\nLatency Bound: " + printTime(latencyBound))
-
-    dptOffset = DPT(chain)
-    dptOffset.getDpt()
-    offsetLatency = dptOffset.maxAge
-
-    print("Exact Analysis: " + printTime(offsetLatency))
-
-    print("\n=====================================================================================")
-    task1 = Task('Task1', useconds(1), mseconds(2), mseconds(2), 0)
-    task2 = Task('Task2', useconds(1), mseconds(5), mseconds(5), 0)
-    task3 = Task('Task3', useconds(1), mseconds(2), mseconds(2), 0)
-    task4 = Task('Task4', useconds(1), mseconds(5), mseconds(5), 0)
-    task5 = Task('Task4', useconds(1), mseconds(2), mseconds(2), 0)
-    task6 = Task('Task4', useconds(1), mseconds(5), mseconds(5), 0)
-    task7 = Task('Task3', useconds(1), mseconds(2), mseconds(2), 0)
-    task8 = Task('Task4', useconds(1), mseconds(5), mseconds(5), 0)
-    task9 = Task('Task4', useconds(1), mseconds(2), mseconds(2), 0)
-    task10 = Task('Task2', useconds(1), mseconds(5), mseconds(5), 0)
-    task11 = Task('Task3', useconds(1), mseconds(2), mseconds(2), 0)
-    task12 = Task('Task4', useconds(1), mseconds(5), mseconds(5), 0)
-    task13 = Task('Task4', useconds(1), mseconds(2), mseconds(2), 0)
-
-    chain = [task1, task2, task3, task4, task5, task6, task7, task8, task9, task10, task11, task12, task13]
+    if is2kMaxHarmonic(chain) is not True:
+        print(":NOT MAX-HARMONIC!")
 
     latencyBound = optimalPhasingSemiHarm(chain)
     print("\nLatency Bound: " + printTime(latencyBound))

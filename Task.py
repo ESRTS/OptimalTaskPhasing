@@ -224,9 +224,17 @@ def is2kMaxHarmonic(tasks):
 
     sortedPeriods = sorted(periods, key=int)
 
+    hp = hyperperiod(tasks)
+
     max1 = sortedPeriods[len(sortedPeriods)-1]
     max2 = sortedPeriods[len(sortedPeriods)-2]
 
+    if max1 * 2 != hp:          # for (2,k)-max harmonic task sets max1 * 2 must be equal to the hyperperiod
+        return False
+    
+    if (hp / max2) % 1 != 0:    # For (2,k)-max harmonic task sets, max2 * k must be equal to the hyperperiod, and k must be integer
+        return False
+    
     for index in range(0, len(sortedPeriods)-2):   # don't check the two largest periods
         if max1 % sortedPeriods[index] != 0 and max2 % sortedPeriods[index] != 0:
             return False
