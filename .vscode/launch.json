@@ -10,7 +10,8 @@
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal",
-            "args": ["2kMaxPeriodTest", "-synth", "-min", "2", "-max", "10", "-inc", "1", "-exp", "20", "-sed", "123", "-k", "7", "-np", "5", "-c", "5", "-heur", "-to", "5"],
+            //"args": ["2kMaxPeriodTest", "-synth", "-min", "2", "-max", "10", "-inc", "1", "-exp", "100", "-sed", "123", "-k", "7", "-np", "5", "-c", "1", "-heur", "-to", "60"],
+            "args": ["shepherding", "-min", "2", "-max", "50", "-inc", "2", "-exp", "1000", "-k", "3,5,7,9", "-s", "shepherding/k3,shepherding/k5,shepherding/k7,shepherding/k9"]
         }
     ]
 }

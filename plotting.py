@@ -514,6 +514,102 @@ def main():
 
     plot(basePath, dstPath, minChainLength, maxChainLength, stepChainLength)
 
+def plot2kMax():
+    os.system('cls' if os.name == 'nt' else 'clear')    # Clear the terminal
+
+    # Setup the arguments for the experiment program.
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument("destination", help="Name of the folder to store the results.", type=str)
+
+    parser.add_argument("-min","--minlength", help="Minimum length of generated chains.", type=int)
+    parser.add_argument("-max","--maxlength", help="Maximum length of generated chains.", type=int)
+    parser.add_argument("-inc","--incrementlength", help="Step between two examined chain length.", type=int)
+    parser.add_argument("-exp","--experimentCount", help="Number of experiments for each configuration and data point.", type=int)
+    parser.add_argument("-k","--kValues", help="List of k-values in the plot.", type=str)
+    parser.add_argument("-s","--source", help="List of source folders for each k-value.", type=str)
+
+    args = parser.parse_args()
+
+    destinationFolder = args.destination                 # Subfolder name to store the experiments results at     
+
+    if args.minlength is not None:
+        minChainLength = args.minlength             # Minimum length of generated chains
+    else:
+        print("--minlength is mandatory for syntehtic experiments.")
+        return
+
+    if args.maxlength is not None:
+            maxChainLength = args.maxlength             # Maximum length of generated chains
+    else:
+        print("--maxlength is mandatory for syntehtic experiments.")
+        return
+
+    if args.incrementlength is not None: 
+        stepChainLength = args.incrementlength      # Step between two examined chain length
+    else:
+        print("--incrementlength is mandatory for syntehtic experiments.")
+        return
+    
+    if args.kValues is not None: 
+        kValueItems = args.kValues.split(',')
+    else:
+        print("--kValues is mandatory for syntehtic experiments.")
+        return
+    
+    if args.source is not None: 
+        sourceItems = args.source.split(',')
+        sourcePaths = []
+
+        for source in sourceItems:
+            sourcePaths.append(os.path.join(os.path.join('output',source), "data") )
+    else:
+        print("--source is mandatory for syntehtic experiments.")
+        return
+    
+    outputPath = os.path.join("output", destinationFolder) 
+    #basePath = os.path.join(outputPath, "data") 
+    dstPath = os.path.join(outputPath, "plots") 
+
+    gen2kmaxPlot(dstPath, sourcePaths, minChainLength, maxChainLength, stepChainLength, kValueItems)
+
+def gen2kmaxPlot(dstPath, sourcePaths, minChainLength, maxChainLength, stepChainLength, kValueItems):
+    
+    graphData = []
+    for i in range(0,len(sourcePaths)):
+        print("K=" + str(kValueItems[i]) + " Path: " + str(sourcePaths[i]))
+
+        
+        
+        for length in range(minChainLength, maxChainLength+1, stepChainLength):   # Read data from CSV files. 
+
+            filename = sourcePaths[i] + "/length_" + str(length) + ".csv"
+            opt = []
+            with open(filename,'r') as csvfile: 
+                data = csv.reader(csvfile, delimiter = ',') 
+                for row in data: 
+                    #opt.append(float((row[3])))
+                    opt.append(float((row[3])) / float((row[1])))
+            avrgOpt = geo_mean(opt)
+
+            graphData.append(['(2,'+str(kValueItems[i])+')-max harmonic', avrgOpt, length])
+
+
+    df = pd.DataFrame(graphData, columns=['Approach', 'Optimal / Synchronous', 'Cause-Effect Chain Length'])
+
+    configure_mpl_for_tex()
+    g = sns.lineplot(data = df, x = 'Cause-Effect Chain Length', y = 'Optimal / Synchronous', hue='Approach', palette='Set2')
+
+    g.legend_.set_title(None)
+
+    if not os.path.isdir(dstPath):
+        os.makedirs(dstPath)
+
+    g.figure.savefig(dstPath + "/AvrgLatencyComp.pdf", bbox_inches='tight')
+    
+    g.cla()
+
 if __name__ == '__main__':
 
-    main()  # CLI to setup the plot parameters and data files
+    plot2kMax()
+    #main()  # CLI to setup the plot parameters and data files

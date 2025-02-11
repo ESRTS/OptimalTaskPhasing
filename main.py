@@ -417,7 +417,7 @@ def main():
     parser.add_argument("-exp","--experimentCount", help="Number of experiments for each configuration and data point.", type=int)
     parser.add_argument("-sed","--seed", help="Seed for the random number generator.", type=int)
     parser.add_argument("-k","--kValue", help="(2,k)-max harmonic periods.", type=int)
-    parser.add_argument("-np","--numPeriods", help="Number of periods with random (2,k)-max harmonic periods.", type=int)
+    parser.add_argument("-np","--numPeriods", help="Minimum number of periods with random (2,k)-max harmonic periods in period sets during generation.", type=int)
 
     args = parser.parse_args()
 
