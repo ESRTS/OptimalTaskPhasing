@@ -52,7 +52,10 @@ def runConfiguration(seed, length, basePath, expCount, onlyMaxHarmonic, runHeuri
                 if automotivePeriods == True:
                     chain = generateRandomTasks(length, 0.5)        # Utilization does not matter since we focus on LET
                 else:
-                    chain = generateRandomTasks2kMax(length, 0.5, k, numPeriods, 200)  # Utilization does not matter since we focus on LET
+                    if k is None:
+                        chain = generateRandomTasksMaxHarmonic(length, 0.5, numPeriods, 200) # Utilization does not matter since we focus on LET
+                    else:
+                        chain = generateRandomTasks2kMax(length, 0.5, k, numPeriods, 200)  # Utilization does not matter since we focus on LET
                 maxHarmonic = isMaxHarmonic(chain)
 
             hp = hyperperiod(chain)
@@ -477,8 +480,7 @@ def main():
             if args.kValue is not None: 
                 k = args.kValue      # k-value of (2,k)-max harmonic periods
             else:
-                print("--For random (2,k)-max harmonic periods, a k value needs to be specified.")
-                return
+                k = None             # We use this to indicate that we generate max-harmonic periods
             
             if args.numPeriods is not None: 
                 numPeriods = args.numPeriods      # numPeriods of (2,k)-max harmonic periods

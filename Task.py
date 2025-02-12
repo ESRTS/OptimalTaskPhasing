@@ -69,7 +69,7 @@ def generateRandomTasks(count, utilization):
     return tasks
 
 def generateRandomTasks2kMax(count, utilization, k, numPeriods, maxAllowedPeriod):
-    """ Function to generate a set of random tasks with (2,k)-max harmonic periods. """
+    """ Function to generate a set of random tasks with random (2,k)-max harmonic periods. """
     generatedTasks = False
 
     while(generatedTasks == False):
@@ -94,6 +94,34 @@ def generateRandomTasks2kMax(count, utilization, k, numPeriods, maxAllowedPeriod
             generatedTasks = True
 
     return tasks
+
+def generateRandomTasksMaxHarmonic(count, utilization, numPeriods, maxAllowedPeriod):
+    """ Function to generate a set of random tasks with random max harmonic periods. """
+    generatedTasks = False
+
+    while(generatedTasks == False):
+        tasks = []
+        periods = generateMaxHarmonicPeriodSet(numPeriods, maxAllowedPeriod)    # Generates random periods that are (2,k)-max harmonic
+        
+        utilizations = drs(count, utilization)
+        id = 0
+
+        for u in utilizations:
+            period = mseconds(random.choice(periods))
+            wcet = math.ceil((u * period) / 1)
+            
+            tasks.append(Task("Task_%s" % (id), wcet, period, period, 0))
+            id += 1
+
+        frac, i = math.modf(tasksetUtilization(tasks) * 100)
+        # Commented the check since we only need periods.
+        #assert (i == utilization * 100)   # Make sure the utilization is correct on two decimals
+
+        if isMaxHarmonic(tasks) == True:  # Double check that the generated chain is (2,k)-max harmonic
+            generatedTasks = True
+
+    return tasks
+
 def tasksetUtilization(tasks):
     """ Function to compute the utilization of a taskset. """
     utilization = 0.0
@@ -239,6 +267,38 @@ def is2kMaxHarmonic(tasks):
         if max1 % sortedPeriods[index] != 0 and max2 % sortedPeriods[index] != 0:
             return False
     return True
+
+def generateMaxHarmonicPeriodSet(numPeriods, maxAllowedPeriod):
+    '''
+    Function generates a random period set with numPeriods periods. The maximum allowed period is 
+    maxAllowedPeriod. During the generation, all possible period sets are generates that have 
+    a length of at least numPeriods. From those the final periods will be selected in addition to the
+    max period of that set, which is needed to be max harminic.
+    '''
+    allSets = []
+    for i in range(1,maxAllowedPeriod+1):
+        tmpSet = []
+        for k in range(1, i+1):
+            if i % k == 0:
+                tmpSet.append(k)
+        if len(tmpSet) >= numPeriods:
+            allSets.append(tmpSet)
+    
+    index = random.randrange(len(allSets))
+    set = sorted(allSets[index], key=int)
+
+    # Now move Tmax1 and Tmax2 to the period set and fill it with random values from the remaining periods 
+    # until the required number of periods is found.
+    periods = []
+
+    periods.append(set.pop())   #Tmax
+
+    for i in range(0,numPeriods-1): # two of the period values are already added to the set
+        index = random.randrange(len(set))
+        periods.append(set[index])
+        set.remove(set[index])
+
+    return sorted(periods, key=int)
 
 if __name__ == '__main__':
     """ Debugging """
