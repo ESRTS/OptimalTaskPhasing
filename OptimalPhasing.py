@@ -203,14 +203,13 @@ if __name__ == '__main__':
     # print("Exact Analysis: " + printTime(offsetLatency))
 
     print("\n=====================================================================================")
-    task1 = Task('Task1', useconds(1), mseconds(8), mseconds(8), 0)
-    task2 = Task('Task2', useconds(1), mseconds(6), mseconds(6), 0)
-    task3 = Task('Task3', useconds(1), mseconds(8), mseconds(8), 0)
-    task4 = Task('Task4', useconds(1), mseconds(1), mseconds(1), 0)
-    task5 = Task('Task5', useconds(1), mseconds(8), mseconds(8), 0)
+    task1 = Task('Task1', useconds(1), mseconds(18), mseconds(18), 0)
+    task2 = Task('Task2', useconds(1), mseconds(4), mseconds(4), 0)
+    task3 = Task('Task3', useconds(1), mseconds(4), mseconds(4), 0)
+    task4 = Task('Task4', useconds(1), mseconds(3), mseconds(3), 0)
 
 
-    chain = [task1, task2, task3, task4, task5, ]
+    chain = [task1, task2, task3, task4 ]
 
     if is2kMaxHarmonic(chain) is not True:
         print(":NOT MAX-HARMONIC!")

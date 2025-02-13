@@ -264,7 +264,7 @@ def is2kMaxHarmonic(tasks):
         return False
     
     for index in range(0, len(sortedPeriods)-2):   # don't check the two largest periods
-        if max1 % sortedPeriods[index] != 0 and max2 % sortedPeriods[index] != 0:
+        if max1 % sortedPeriods[index] != 0 or max2 % sortedPeriods[index] != 0:
             return False
     return True
 
