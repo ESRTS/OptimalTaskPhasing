@@ -405,7 +405,7 @@ def plot(dataFolder, dstFolder, start, stop, step):
         xpos = (1 / (len(xTicksLabels) + 1)) * i
         plt.plot((xpos-0.001, xpos-0.001), (0, -0.05), **kwargs, linewidth=4, color = 'w')    # This overwrites the tick mark
 
-    plt.figure.savefig(dstFolder + "/LatencyReduction.pdf", bbox_inches='tight')
+    plt.figure.savefig(dstFolder + "/NormalizedLatency.pdf", bbox_inches='tight')
     
     plt.cla()
 

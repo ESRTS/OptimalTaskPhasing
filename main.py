@@ -53,9 +53,9 @@ def runConfiguration(seed, length, basePath, expCount, onlyMaxHarmonic, runHeuri
                     chain = generateRandomTasks(length, 0.5)        # Utilization does not matter since we focus on LET
                 else:
                     if k is None:
-                        chain = generateRandomTasksMaxHarmonic(length, 0.5, numPeriods, 200) # Utilization does not matter since we focus on LET
+                        chain = generateRandomTasksMaxHarmonic(length, 0.5, numPeriods, 500) # Utilization does not matter since we focus on LET
                     else:
-                        chain = generateRandomTasks2kMax(length, 0.5, k, numPeriods, 200)  # Utilization does not matter since we focus on LET
+                        chain = generateRandomTasks2kMax(length, 0.5, k, numPeriods, 500)  # Utilization does not matter since we focus on LET
                 maxHarmonic = isMaxHarmonic(chain)
 
             hp = hyperperiod(chain)
