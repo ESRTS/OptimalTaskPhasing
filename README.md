@@ -78,7 +78,12 @@ shepherding. The shepherding process is ongoing.
 
 To reproduce the experiments of the paper, dedicated scripts are provided. Where applicable, the number of evaluated task chains per configuration can be configured as argument, allowing to generate results with less data points in reduced runtime. 
 
-For each experiment, we assume the current folder is `OptimalTaskPhasing `.
+For each experiment, we assume the current folder is `OptimalTaskPhasing` and the virtual environment is active:
+
+```
+cd OptimalTaskPhasing
+source .venv/bin/activate
+```
 
 ### Experiment 1
 
