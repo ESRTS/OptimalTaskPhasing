@@ -290,6 +290,8 @@ def caseStudy(dstPath):
     dpt.getDpt()
     print("Syncronous Release Exact Analysis : " + chainString(chain) + " => Latency = " + printTime(dpt.maxAge))
 
+    harmonicLatencySync = dpt.maxAge
+
     combinations = combinationsHeuristic(chain, mseconds(1))
 
     print("Case Study: " + str(combinations) + " combinations are checked with the heuristic.")
@@ -299,6 +301,8 @@ def caseStudy(dstPath):
     durationHeuristic = timer() - start
 
     print("Heuristic: " + chainString(chain) + " => Latency = " + printTime(heur) + " in " + str(durationHeuristic * 1000) + " ms")
+
+    harmonicRuntimeMartinez = durationHeuristic * 1000
 
     dpt = DPT(chain)
     dpt.getDpt()
@@ -314,6 +318,9 @@ def caseStudy(dstPath):
     durationOptimal = timer() - start
 
     print("Optimal Latency = " + printTime(opt) + " in " + str(durationOptimal * 1000) + " ms")
+
+    harmonicOptimalLatency = opt
+    harmonicRuntimeOurs = durationOptimal * 1000
 
     print("\nMartinez Latency = " + printTime(calculateLatencyMartinezTCAD18(chain)))
 
@@ -339,6 +346,8 @@ def caseStudy(dstPath):
     dpt.getDpt()
     print("Syncronous Release Exact Analysis : " + chainString(chain) + " => Latency = " + printTime(dpt.maxAge))
 
+    semiHarmonicLatencySync = dpt.maxAge
+
     combinations = combinationsHeuristic(chain, mseconds(1))
 
 
@@ -349,6 +358,8 @@ def caseStudy(dstPath):
     durationHeuristic = timer() - start
 
     print("Heuristic: " + chainString(chain) + " => Latency = " + printTime(heur) + " in " + str(durationHeuristic * 1000) + " ms")
+
+    semiHarmonicRuntimeMartinez = durationHeuristic * 1000
 
     dpt = DPT(chain)
     dpt.getDpt()
@@ -365,6 +376,9 @@ def caseStudy(dstPath):
 
     print("Optimal Latency = " + printTime(opt) + " in " + str(durationOptimal * 1000) + " ms")
 
+    semiHarmonicOptimalLatency = opt
+    semiHarmonicRuntimeOurs = durationOptimal * 1000
+
     print("\nMartinez Latency = " + printTime(calculateLatencyMartinezTCAD18(chain)))
 
     print("Ours Optimal: " + chainString(chain) + " => Latency = " + printTime(opt))
@@ -374,6 +388,20 @@ def caseStudy(dstPath):
     with open(filePath, "a") as file:
         file.write(str(heur) + "," + "{:.6f}".format(durationHeuristic * 1000) + "," + str(opt) + "," + "{:.6f}".format(durationOptimal * 1000) )
         file.close()
+
+    print("\n=====================================================================================")
+    print("= TABLE 1")
+    print("=====================================================================================")
+    print("|\t\t\t| Harmonic\t| Semi-Harmonic\t|")
+    print("|--------------------------------------------------------")
+    print("| Synchronous Lat(E)\t| " + printTime(harmonicLatencySync) + "\t| " + printTime(semiHarmonicLatencySync) + "\t|")
+    print("|--------------------------------------------------------")
+    print("| Optimal Lat(E)\t| " + printTime(harmonicOptimalLatency) + "\t| " + printTime(semiHarmonicOptimalLatency) + "\t|")
+    print("|--------------------------------------------------------")
+    print("| Runtime  Martinez\t| " + "{:.3f}".format(harmonicRuntimeMartinez) + " ms\t| " + "{:.3f} ms".format(semiHarmonicRuntimeMartinez) + "\t|")
+    print("|--------------------------------------------------------")
+    print("| Runtime Ours\t\t| " + "{:.3f}".format(harmonicRuntimeOurs) + " ms\t| " + "{:.3f} ms".format(semiHarmonicRuntimeMartinez) + "\t|")
+    print("|--------------------------------------------------------")
 
 def storeExperimentConfig(args):
     """ This function creates a text file with all configuration options set.  
