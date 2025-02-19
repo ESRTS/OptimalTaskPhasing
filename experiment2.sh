@@ -21,4 +21,4 @@ python3 main.py experiment2 --synthetic --cores "$CORES" --automotivePeriods --m
 ###
 # Open the plot that is used for Figure 7.
 ###
-open output/experiment2/plots/NormalizedLatency.pdf
+open output/experiment2/plots/NormalizedLatency.pdf &

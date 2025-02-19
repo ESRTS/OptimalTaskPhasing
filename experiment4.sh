@@ -32,4 +32,4 @@ python3 plotting.py experiment4 --minlength 2 --maxlength 50 --incrementlength 2
 ###
 # Open the plot that is used for the new experiment (currently being added during shepherding).
 ###
-open output/experiment4/plots/AvrgLatencyComp.pdf
+open output/experiment4/plots/AvrgLatencyComp.pdf &

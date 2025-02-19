@@ -13,11 +13,14 @@ import csv
 import os
 import argparse
 from pathlib import Path
+import warnings 
+
+warnings.filterwarnings("ignore")  # Tick labels for some boxplots are arranges manually which creates warnings. Those are turned off here. 
 
 def configure_mpl_for_tex():
     "Configures matplotlib for LaTeX embedding"
     # Inspired by https://jwalton.info/Embed-Publication-Matplotlib-Latex/
-    # Adjusted from the version of T. Blass
+    # Adjusted from the version of Tobias Blass
 
     # Width of the IEEE template column, determined by \the\columnwidth
     width_pts = 252
@@ -30,7 +33,7 @@ def configure_mpl_for_tex():
     # Figure width in inches
     width_in = width_pts * inches_per_pt * rel_width
     # Figure height in inches
-    height_in = width_in * 0.5#golden_ratio
+    height_in = width_in * 0.5
     width_in = width_in * 1
     
     settings = {
@@ -303,7 +306,7 @@ def plot(dataFolder, dstFolder, start, stop, step):
     df = pd.DataFrame(data, columns=['Approach', 'Cause-Effect Chain Length', 'Latency [$H$]', 'Runtime [s]'])
 
     ######################################################################################################
-    # BOXPLOT comparing latency of sync approach to optimal phasing
+    # BOXPLOT comparing end-to-end latency of different appraoches
     ######################################################################################################
     configure_mpl_for_tex()
 
@@ -409,172 +412,10 @@ def plot(dataFolder, dstFolder, start, stop, step):
     
     plt.cla()
 
-    ######################################################################################################
-    # Lineplot comparing different latency values
-    ######################################################################################################
-    
-    #data = readAverageValuesGeometric(dataFolder, start, stop, step)
-   
-    #df = pd.DataFrame(data, columns=['Approach', 'Average Latency [$H$]', 'Cause-Effect Chain Length'])
-
-    #configure_mpl_for_tex()
-    #g = sns.lineplot(data = df, x = 'Cause-Effect Chain Length', y = 'Average Latency [$H$]', hue='Approach', palette='Set2')
-
-    #g.legend_.set_title(None)
-
-    #plt.figure.savefig(dstFolder + "/AvrgLatencyComp.pdf", bbox_inches='tight')
-    
-    #plt.cla()
-
-    ######################################################################################################
-    # Boxplot for the phasing combinations to check by the heuristic of Martinez et al.
-    ######################################################################################################
-
-    #data = readOffsetHeuristicData(dataFolder, start, stop, step)
-
-    #df = pd.DataFrame(data, columns=['Approach', 'Cause-Effect Chain Length', 'Phase Combinations'])
-
-    #configure_mpl_for_tex()
-
-    #plt = sns.boxplot(x = df['Cause-Effect Chain Length'],
-    #        y = df['Phase Combinations'],
-    #        hue = df['Approach'], fliersize=2, linewidth=1, palette='Set2')
-    #plt.set_yscale("log")
-   
-    #plt.get_legend().remove()
-    ##plt.legend(ncol=2, loc="upper left")
-    ##plt.set(ylim=(0, 2))
-    
-    #plt.figure.savefig(dstFolder + "/HeuristicCombinations.pdf", bbox_inches='tight')
-    
-    #plt.cla()
-
-
-    #print("Improvement")
-    #for length in range(start, stop+1, step):
-    #    print("Length " + str(length) + " : " + str(getImprovementForChainLength(dataFolder, length)) + " Min: " + str(getMinImprovementForChainLength(dataFolder, length)) + " Max: " + str(getMaxImprovementForChainLength(dataFolder, length)))
-
-
-    #print("Runtime Ours")
-    #for length in range(start, stop+1, step):
-    #    print("Length " + str(length) + " : " + "{:.6f}".format(getAvrgRuntimeOurs(dataFolder, length)) + " Min: " + "{:.6f}".format(getMinRuntimeOurs(dataFolder, length)) + " Max: " + "{:.6f}".format(getMaxRuntimeOurs(dataFolder, length)))
-
-    #print("Max-Harmonic Ratio")
-    #for length in range(start, stop+1, step):
-    #    print("Length " + str(length) + " : " + "{:.6f}".format(readMaxHarmRatio(dataFolder, length)))
-
-
-    
-def main():
-    os.system('cls' if os.name == 'nt' else 'clear')    # Clear the terminal
-
-    # Setup the arguments for the experiment program.
-    parser = argparse.ArgumentParser()
-
-    parser.add_argument("destination", help="Name of the folder to store the results.", type=str)
-
-    parser.add_argument("-heur","--heuristic", help="Set to true to enable the offset heuristic of Martinez et al. TCAD'18 (long runtime).", action="store_true")
-    parser.add_argument("-min","--minlength", help="Minimum length of generated chains.", type=int)
-    parser.add_argument("-max","--maxlength", help="Maximum length of generated chains.", type=int)
-    parser.add_argument("-inc","--incrementlength", help="Step between two examined chain length.", type=int)
-    parser.add_argument("-exp","--experimentCount", help="Number of experiments for each configuration and data point.", type=int)
-
-    args = parser.parse_args()
-
-    # Experiment Configuration
-
-    destinationFolder = args.destination                 # Subfolder name to store the experiments results at              
-
-        
-    # Configuration for the synthetic experiments
-    onlyMaxHarmonic = False                         # Set this flag to false to keep also chains that are not max-harmonic
-    runHeuristic = args.heuristic                   # Set this flag to enable the offset heuristic by Martinez et al.  
-
-    if args.minlength is not None:
-        minChainLength = args.minlength             # Minimum length of generated chains
-    else:
-        print("--minlength is mandatory for syntehtic experiments.")
-        return
-
-    if args.maxlength is not None:
-            maxChainLength = args.maxlength             # Maximum length of generated chains
-    else:
-        print("--maxlength is mandatory for syntehtic experiments.")
-        return
-
-    if args.incrementlength is not None: 
-        stepChainLength = args.incrementlength      # Step between two examined chain length
-    else:
-        print("--incrementlength is mandatory for syntehtic experiments.")
-        return
-
-    outputPath = os.path.join("output", destinationFolder) 
-    basePath = os.path.join(outputPath, "data") 
-    dstPath = os.path.join(outputPath, "plots") 
-
-    plot(basePath, dstPath, minChainLength, maxChainLength, stepChainLength)
-
-def plot2kMax():
-    os.system('cls' if os.name == 'nt' else 'clear')    # Clear the terminal
-
-    # Setup the arguments for the experiment program.
-    parser = argparse.ArgumentParser()
-
-    parser.add_argument("destination", help="Name of the folder to store the results.", type=str)
-
-    parser.add_argument("-min","--minlength", help="Minimum length of generated chains.", type=int)
-    parser.add_argument("-max","--maxlength", help="Maximum length of generated chains.", type=int)
-    parser.add_argument("-inc","--incrementlength", help="Step between two examined chain length.", type=int)
-    parser.add_argument("-exp","--experimentCount", help="Number of experiments for each configuration and data point.", type=int)
-    parser.add_argument("-k","--kValues", help="List of k-values in the plot.", type=str)
-    parser.add_argument("-s","--source", help="List of source folders for each k-value.", type=str)
-
-    args = parser.parse_args()
-
-    destinationFolder = args.destination                 # Subfolder name to store the experiments results at     
-
-    if args.minlength is not None:
-        minChainLength = args.minlength             # Minimum length of generated chains
-    else:
-        print("--minlength is mandatory for syntehtic experiments.")
-        return
-
-    if args.maxlength is not None:
-            maxChainLength = args.maxlength             # Maximum length of generated chains
-    else:
-        print("--maxlength is mandatory for syntehtic experiments.")
-        return
-
-    if args.incrementlength is not None: 
-        stepChainLength = args.incrementlength      # Step between two examined chain length
-    else:
-        print("--incrementlength is mandatory for syntehtic experiments.")
-        return
-    
-    if args.kValues is not None: 
-        kValueItems = args.kValues.split(',')
-    else:
-        print("--kValues is mandatory for syntehtic experiments.")
-        return
-    
-    if args.source is not None: 
-        sourceItems = args.source.split(',')
-        sourcePaths = []
-
-        for source in sourceItems:
-            sourcePaths.append(os.path.join(os.path.join('output',source), "data") )
-    else:
-        print("--source is mandatory for syntehtic experiments.")
-        return
-    
-    outputPath = os.path.join("output", destinationFolder) 
-    #basePath = os.path.join(outputPath, "data") 
-    dstPath = os.path.join(outputPath, "plots") 
-
-    gen2kmaxPlot(dstPath, sourcePaths, minChainLength, maxChainLength, stepChainLength, kValueItems)
-
 def gen2kmaxPlot(dstPath, sourcePaths, minChainLength, maxChainLength, stepChainLength, kValueItems):
-    
+    '''
+    Method generates the plot to compare the mean latency of cause-effect chains with different (2,k)-max periods (i.e. one curve for each provided value of 'k'). 
+    '''
     graphData = []
     for i in range(0,len(sourcePaths)):
         print("K=" + str(kValueItems[i]) + " Path: " + str(sourcePaths[i]))
@@ -605,11 +446,156 @@ def gen2kmaxPlot(dstPath, sourcePaths, minChainLength, maxChainLength, stepChain
     if not os.path.isdir(dstPath):
         os.makedirs(dstPath)
 
-    g.figure.savefig(dstPath + "/AvrgLatencyComp.pdf", bbox_inches='tight')
+    g.figure.savefig(dstPath + "/MeanLatencyComp.pdf", bbox_inches='tight')
     
     g.cla()
 
+def combineResults(destinationFolder, input) :
+
+    paths = input.split(',')
+    
+    # If the data folder exists, it and its content is deleted here. This is important as file merging appends to the new csv-files!
+    dataPath = os.path.join("output", destinationFolder, "data") 
+    if os.path.isdir(dataPath):
+        allfiles = [f for f in os.listdir(dataPath) if os.path.isfile(os.path.join(dataPath, f))]
+        for fileName in allfiles:
+            filePath = os.path.join(dataPath, fileName)
+            os.remove(filePath)
+        os.rmdir(dataPath)
+    os.makedirs(dataPath)   
+
+    # If the plots folder exists, it and its content is deleted here.
+    plotsPath = os.path.join("output", destinationFolder, "plots") 
+    if os.path.isdir(plotsPath):
+        allfiles = [f for f in os.listdir(plotsPath) if os.path.isfile(os.path.join(plotsPath, f))]
+        for fileName in allfiles:
+            filePath = os.path.join(plotsPath, fileName)
+            os.remove(filePath)
+        os.rmdir(plotsPath)
+    os.makedirs(plotsPath)
+    
+    for path in paths:
+        sourceDataPath = os.path.join("output", destinationFolder, path, "data")  # The experiment results are stored here.
+        
+        allfiles = [f for f in os.listdir(sourceDataPath) if os.path.isfile(os.path.join(sourceDataPath, f))]
+        
+        for fileName in allfiles:
+            srcFilePath = os.path.join(sourceDataPath, fileName)
+            dstFilePath = os.path.join(dataPath, fileName)
+            print(srcFilePath + " -> " + dstFilePath) 
+
+            srcFile = open(srcFilePath, "r")
+            dstFile = open(dstFilePath, "a")
+
+            dstFile.write(srcFile.read())
+
+            srcFile.close()
+            dstFile.close()
+
+
 if __name__ == '__main__':
 
-    plot2kMax()
-    #main()  # CLI to setup the plot parameters and data files
+    # Setup the arguments for the experiment program.
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument("destination", help="Name of the folder to store the results.", type=str)
+
+    parser.add_argument("-t","--type", help="Defines the plot type 'NORMAL', '2KMAX', 'COMBINE'.", type=str)
+
+    parser.add_argument("-i","--input", help="List of source paths to data that should be combined.", type=str)
+
+    parser.add_argument("-min","--minlength", help="Minimum length of generated chains.", type=int)
+    parser.add_argument("-max","--maxlength", help="Maximum length of generated chains.", type=int)
+    parser.add_argument("-inc","--incrementlength", help="Step between two examined chain length.", type=int)
+    parser.add_argument("-exp","--experimentCount", help="Number of experiments for each configuration and data point.", type=int)
+    parser.add_argument("-k","--kValues", help="List of k-values in the plot.", type=str)
+    parser.add_argument("-s","--source", help="List of source folders for each k-value.", type=str)
+
+    parser.add_argument("-heur","--heuristic", help="Set to true to enable the offset heuristic of Martinez et al. TCAD'18 (long runtime).", action="store_true")
+
+
+
+    args = parser.parse_args()
+
+    destinationFolder = args.destination                 # Subfolder name to store the experiments results at    
+
+    type = args.type                                     # Select which type of function to call 
+
+    if type == 'NORMAL':    # Used to plot results from one main.py execution
+
+        if args.minlength is not None:
+            minChainLength = args.minlength             # Minimum length of generated chains
+        else:
+            print("--minlength is mandatory for syntehtic experiments.")
+            exit(1)
+
+        if args.maxlength is not None:
+                maxChainLength = args.maxlength             # Maximum length of generated chains
+        else:
+            print("--maxlength is mandatory for syntehtic experiments.")
+            exit(1)
+
+        if args.incrementlength is not None: 
+            stepChainLength = args.incrementlength      # Step between two examined chain length
+        else:
+            print("--incrementlength is mandatory for syntehtic experiments.")
+            exit(1)
+
+        outputPath = os.path.join("output", destinationFolder) 
+        basePath = os.path.join(outputPath, "data") 
+        dstPath = os.path.join(outputPath, "plots") 
+
+        plot(basePath, dstPath, minChainLength, maxChainLength, stepChainLength)
+    elif type == '2KMAX':   # Used to plot a grapg with multiple (2,k)-max harmonic curves, one for each provided 'k'. 
+
+        if args.minlength is not None:
+            minChainLength = args.minlength             # Minimum length of generated chains
+        else:
+            print("--minlength is mandatory for syntehtic experiments.")
+            exit(1)
+
+        if args.maxlength is not None:
+                maxChainLength = args.maxlength             # Maximum length of generated chains
+        else:
+            print("--maxlength is mandatory for syntehtic experiments.")
+            exit(1)
+
+        if args.incrementlength is not None: 
+            stepChainLength = args.incrementlength      # Step between two examined chain length
+        else:
+            print("--incrementlength is mandatory for syntehtic experiments.")
+            exit(1)
+        
+        if args.kValues is not None: 
+            kValueItems = args.kValues.split(',')
+        else:
+            print("--kValues is mandatory for syntehtic experiments.")
+            exit(1)
+        
+        if args.source is not None: 
+            sourceItems = args.source.split(',')
+            sourcePaths = []
+
+            for source in sourceItems:
+                sourcePaths.append(os.path.join(os.path.join('output',source), "data") )
+        else:
+            print("--source is mandatory for syntehtic experiments.")
+            exit(1)
+        
+        outputPath = os.path.join("output", destinationFolder) 
+        dstPath = os.path.join(outputPath, "plots") 
+
+        gen2kmaxPlot(dstPath, sourcePaths, minChainLength, maxChainLength, stepChainLength, kValueItems)
+
+
+    elif type == 'COMBINE': # Used to combine results from multiple calls to main.py in a single data set.
+
+        if args.input is not None:
+            input = args.input             # Minimum length of generated chains
+        else:
+            print("--source a mandatory parameter.")
+            exit(1)
+
+        combineResults(destinationFolder, input)
+
+    

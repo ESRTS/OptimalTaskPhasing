@@ -8,7 +8,7 @@ then
 else
   SAMPLES=$1
 
-  if [ $SAMPLES % 5 -neq 0 ]
+  if [ $(($SAMPLES % 5)) -eq 0 ]
   then 
     echo "Collecting $SAMPLES samples for each configuration."
   else
@@ -21,7 +21,7 @@ fi
 CORES=4
 
 # The samples with heuristic are collected in 5 batches with different seeds. Here the number of samples per batch is calculated.
-SAMPLES_HEURISTIC_INDIVIDUAL=$SAMPLES / 5
+SAMPLES_HEURISTIC_INDIVIDUAL=$(($SAMPLES/5))
 
 ###
 # Run the experiment with the heuristic for a chain length of 2 to 4. The 
@@ -42,3 +42,17 @@ python3 main.py experiment3/heuristicBase --synthetic --cores $CORES --automotiv
 ###
 python3 main.py experiment3/heuristicBase50 --synthetic --cores $CORES --automotivePeriods --minlength 50 --maxlength 50 --incrementlength 1 --experimentCount $SAMPLES --seed 123
 
+###
+# To plot the results all individual measurements are combined in a common data folder
+###
+python3 plotting.py experiment3 --type COMBINE --input "heuristic1,heuristic2,heuristic3,heuristic4,heuristic5,heuristicBase,heuristicBase50"
+
+###
+# Generate plots for the combined data
+###
+python3 plotting.py experiment3 --type NORMAL --minlength 2 --maxlength 50 --incrementlength 1
+
+###
+# Open the plot that is used for Figure 8.
+###
+open output/experiment3/plots/AnalysisTimeComp.pdf &
