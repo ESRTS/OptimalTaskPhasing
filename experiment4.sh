@@ -14,7 +14,7 @@ fi
 CORES=4
 
 # Number of periods in one tasset for the chain generation.
-NUM_PERIODS=10
+NUM_PERIODS=5
 
 ###
 # Run the experiment to evaluate the end-to-end latency with the automotive period set.
