@@ -11,7 +11,7 @@ else
 fi
 
 # Set the number of threads/cores that are used for the experiment.
-$CORES = 4
+CORES=4
 
 ###
 # Run the experiment to evaluate the end-to-end latency with the automotive period set.
