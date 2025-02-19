@@ -26,19 +26,19 @@ SAMPLES_HEURISTIC_INDIVIDUAL = $SAMPLES / 5
 ###
 # Run the experiment with the heuristic for a chain length of 2 to 4. The 
 ###
-python main.py experiment3/heuristic1 --synthetic --cores $CORES --automotivePeriods -minlength 2 --maxlength 4 --incrementlength 1 --heuristic --experimentCount $SAMPLES_HEURISTIC_INDIVIDUAL --seed 345
-python main.py experiment3/heuristic2 --synthetic --cores $CORES --automotivePeriods -minlength 2 --maxlength 4 --incrementlength 1 --heuristic --experimentCount $SAMPLES_HEURISTIC_INDIVIDUAL --seed 456
-python main.py experiment3/heuristic3 --synthetic --cores $CORES --automotivePeriods -minlength 2 --maxlength 4 --incrementlength 1 --heuristic --experimentCount $SAMPLES_HEURISTIC_INDIVIDUAL --seed 567
-python main.py experiment3/heuristic4 --synthetic --cores $CORES --automotivePeriods -minlength 2 --maxlength 4 --incrementlength 1 --heuristic --experimentCount $SAMPLES_HEURISTIC_INDIVIDUAL --seed 678
-python main.py experiment3/heuristic5 --synthetic --cores $CORES --automotivePeriods -minlength 2 --maxlength 4 --incrementlength 1 --heuristic --experimentCount $SAMPLES_HEURISTIC_INDIVIDUAL --seed 789
+python3 main.py experiment3/heuristic1 --synthetic --cores $CORES --automotivePeriods -minlength 2 --maxlength 4 --incrementlength 1 --heuristic --experimentCount $SAMPLES_HEURISTIC_INDIVIDUAL --seed 345
+python3 main.py experiment3/heuristic2 --synthetic --cores $CORES --automotivePeriods -minlength 2 --maxlength 4 --incrementlength 1 --heuristic --experimentCount $SAMPLES_HEURISTIC_INDIVIDUAL --seed 456
+python3 main.py experiment3/heuristic3 --synthetic --cores $CORES --automotivePeriods -minlength 2 --maxlength 4 --incrementlength 1 --heuristic --experimentCount $SAMPLES_HEURISTIC_INDIVIDUAL --seed 567
+python3 main.py experiment3/heuristic4 --synthetic --cores $CORES --automotivePeriods -minlength 2 --maxlength 4 --incrementlength 1 --heuristic --experimentCount $SAMPLES_HEURISTIC_INDIVIDUAL --seed 678
+python3 main.py experiment3/heuristic5 --synthetic --cores $CORES --automotivePeriods -minlength 2 --maxlength 4 --incrementlength 1 --heuristic --experimentCount $SAMPLES_HEURISTIC_INDIVIDUAL --seed 789
 
 ###
 # Run the experiment to collect results without the heuristic for chain length 5 to 10
 ###
-python main.py experiment3/heuristicBase --synthetic --cores $CORES --automotivePeriods -minlength 5 --maxlength 10 --incrementlength 1 --experimentCount $SAMPLES --seed 123
+python3 main.py experiment3/heuristicBase --synthetic --cores $CORES --automotivePeriods -minlength 5 --maxlength 10 --incrementlength 1 --experimentCount $SAMPLES --seed 123
 
 ###
 # Run the experiment to collect results without the heuristic for chain length of 50
 ###
-python main.py experiment3/heuristicBase50 --synthetic --cores $CORES --automotivePeriods -minlength 50 --maxlength 50 --incrementlength 1 --experimentCount $SAMPLES --seed 123
+python3 main.py experiment3/heuristicBase50 --synthetic --cores $CORES --automotivePeriods -minlength 50 --maxlength 50 --incrementlength 1 --experimentCount $SAMPLES --seed 123
 

@@ -3,4 +3,4 @@
 ###
 # Run the case study.
 ###
-python main.py experiment1 --casestudy 
+python3 main.py experiment1 --casestudy 
