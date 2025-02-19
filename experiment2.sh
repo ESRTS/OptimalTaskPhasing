@@ -16,6 +16,6 @@ CORES=4
 ###
 # Run the experiment to evaluate the end-to-end latency with the automotive period set.
 ###
-python3 main.py experiment2 --synthetic --cores "$CORES" --automotivePeriods -minlength 2 --maxlength 50 --incrementlength 2 --experimentCount "$SAMPLES" --seed 123
+python3 main.py experiment2 --synthetic --cores "$CORES" --automotivePeriods --minlength 2 --maxlength 50 --incrementlength 2 --experimentCount "$SAMPLES" --seed 123
 
 
