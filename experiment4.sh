@@ -27,4 +27,9 @@ python3 main.py experiment4/k9 --synthetic --cores $CORES --minlength 2 --maxlen
 ###
 # Call the plotting explicitly with the configuration to collect all data recorded above. 
 ###
-python3 plotting.py experiment4 -minlength 2 --maxlength 50 --incrementlength 2 --kValue "3,5,7,9,max" --source "experiment4/k3,experiment4/k5experiment4/k7experiment4/k9"
+python3 plotting.py experiment4 --minlength 2 --maxlength 50 --incrementlength 2 --kValue "3,5,7,9" --source "experiment4/k3,experiment4/k5,experiment4/k7,experiment4/k9"
+
+###
+# Open the plot that is used for the new experiment (currently being added during shepherding).
+###
+open output/experiment4/plots/AvrgLatencyComp.pdf

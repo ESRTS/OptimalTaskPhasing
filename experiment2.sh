@@ -18,4 +18,7 @@ CORES=4
 ###
 python3 main.py experiment2 --synthetic --cores "$CORES" --automotivePeriods --minlength 2 --maxlength 50 --incrementlength 2 --experimentCount "$SAMPLES" --seed 123
 
-
+###
+# Open the plot that is used for Figure 7.
+###
+open output/experiment2/plots/NormalizedLatency.pdf
