@@ -212,22 +212,10 @@ def generatePeriodSet(k, numPeriods, maxAllowedPeriod):
         if len(tmpPeriodSet) >= numPeriods:
             periodSets.append(tmpPeriodSet)
 
-    index = random.randrange(len(periodSets))
-    set = sorted(periodSets[index], key=int)
+    index = random.randrange(len(periodSets))   # Pick a random period set out of all generated sets
+    set = sorted(periodSets[index], key=int)    # Sort the periods
 
-    # Now move Tmax1 and Tmax2 to the period set and fill it with random values from the remaining periods 
-    # until the required number of periods is found.
-    periods = []
-
-    periods.append(set.pop())   #Tmax1
-    periods.append(set.pop())   #Tmax2
-
-    for i in range(0,numPeriods-2): # two of the period values are already added to the set
-        index = random.randrange(len(set))
-        periods.append(set[index])
-        set.remove(set[index])
-
-    return sorted(periods, key=int)
+    return set
 
 def getTmax2(k, tmax1):
     '''
@@ -270,10 +258,9 @@ def is2kMaxHarmonic(tasks):
 
 def generateMaxHarmonicPeriodSet(numPeriods, maxAllowedPeriod):
     '''
-    Function generates a random period set with numPeriods periods. The maximum allowed period is 
+    Function generates a random period set with at least numPeriods periods. The maximum allowed period is 
     maxAllowedPeriod. During the generation, all possible period sets are generates that have 
-    a length of at least numPeriods. From those the final periods will be selected in addition to the
-    max period of that set, which is needed to be max harminic.
+    a length of at least numPeriods. From those the final periods will be selected.
     '''
     allSets = []
     for i in range(1,maxAllowedPeriod+1):
@@ -287,53 +274,19 @@ def generateMaxHarmonicPeriodSet(numPeriods, maxAllowedPeriod):
     index = random.randrange(len(allSets))
     set = sorted(allSets[index], key=int)
 
-    # Now move Tmax1 and Tmax2 to the period set and fill it with random values from the remaining periods 
-    # until the required number of periods is found.
-    periods = []
-
-    periods.append(set.pop())   #Tmax
-
-    for i in range(0,numPeriods-1): # two of the period values are already added to the set
-        index = random.randrange(len(set))
-        periods.append(set[index])
-        set.remove(set[index])
-
-    return sorted(periods, key=int)
+    return set
 
 if __name__ == '__main__':
     """ Debugging """
-    #random.seed(123)
-
-    # task1 = Task('Task1', useconds(100), mseconds(100), mseconds(100), 0)
-
-    # print(task1)
-
-    # print(task1.utilization())
-
-    # job = Job(task1, 0)
-
-    # jobs = task1.getJobsUntil(mseconds(500))
-
-    # for j in jobs:
-    #     print(j)
-
-    # tasks = generateRandomTasks(10, 1)
-
-    # for t in tasks:
-    #     print(t)
-
-    # print("Utilization: " , tasksetUtilization(tasks))
-
-    # print("Max. Harmonic: " , isMaxHarmonic(tasks))
 
     for i in range(0,10000):
-        #periods = generatePeriodSet(7, 5, 1000)
+        periods = generatePeriodSet(3, 5, 500)
 
-        #print(periods)
+        print(periods)
 
-        tasks = generateRandomTasks2kMax(5, 0.5, 7, 5, 500) #count, utilization, k, numPeriods, maxAllowedPeriod
-        print("--------------------------")
-        for task in tasks:
-            print(str(task.period))
-        print("--------------------------")
-        assert is2kMaxHarmonic(tasks)
+        # tasks = generateRandomTasks2kMax(5, 0.5, 7, 5, 500) #count, utilization, k, numPeriods, maxAllowedPeriod
+        # print("--------------------------")
+        # for task in tasks:
+        #     print(str(task.period))
+        # print("--------------------------")
+        # assert is2kMaxHarmonic(tasks)

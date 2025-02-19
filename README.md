@@ -14,6 +14,23 @@ virtual machine image is the recommended approach. (2) Manual installation on Li
 
 ### Using the Virtual Machine Image
 
+A virtual machine image based on Ubuntu 24.10 is provided at the link: [VM download link]()
+
+The VM is based on an image obtained from [osboxes.org](www.osboxes.org).
+
+* **User:** osboxes.org
+* **Password:** osboxes.org
+
+The source code is deployed on the desktop and all required software is installed. 
+To move to the folder and activate the prepared virtual environment, the following commands are exected:
+
+```
+cd Desktop/OptimalTaskPhasing
+source .venv/bin/activate
+```
+
+Afterwards, the steps described below to [reproduce the experiment](#reproducing-experiments) can be followed. 
+
 ### Installing Manually
 As a prerequisite, the following should be installed on the platform:
 * Python 3
@@ -32,7 +49,7 @@ To avoid version conflicts with required packets, it is recommended to use a vir
 to reproduce the experiments. A new virtual environment is created in a folder .venv in the current
 directory by the following command:
 ```
-python -m venv .venv
+python3 -m venv .venv
 ```
 The virtual environment in activated by the following command:
 ```
@@ -73,8 +90,22 @@ pip install -r requirements.txt
 
 ## Reproducing Experiments 
 
-The paper includes four experiments. Note that experiment four is a new experiment added during
-shepherding. The shepherding process is ongoing.
+The paper includes four experiments.
+Note that experiment four is a new experiment added during
+shepherding. 
+The shepherding process is ongoing.
+The mapping of experiment to paper element is as follows.
+The table also shows expected runtimes with the virtual machine. 
+For pots in the paper, 1000 random chains are evaluated for each data point.
+This can be very timeconsuming and a reduced number of samples can be used instead.  
+
+| Name          | Paper       | Runtime 50  | Runtime 1000    |
+|---------------|-------------|-------------|-----------------|
+| [Experiment 1](#experiment-1)  | Table 1     | < 5 s (no sample count needed)|
+| [Experiment 2](#experiment-2)  | Figure 7    | ~30 min      | 10h            |
+| [Experiment 3](#experiment-3)  | Figure 8    |  min         | h              |
+| [Experiment 4](#experiment-4)  | Shepherding |  min         | h              |
+
 
 To reproduce the experiments of the paper, dedicated scripts are provided. Where applicable, the number of evaluated task chains per configuration can be configured as argument, allowing to generate results with less data points in reduced runtime. 
 
@@ -121,7 +152,7 @@ This way, the runtime of the experiment can be reduced.
 The results will be saved to the folder `output/experiment2`. 
 CSV-files for each evaluated chain length are stored in the subfolder `/data`. 
 The generated plots are stored in the subfolder `/plots`.
-The plot named `output/experiment2/plots/NormalizedLatency.pdf` is shown as `Fig. 7` in the paper.
+The plot named `output/experiment2/plots/NormalizedLatency.pdf` is shown as `Fig. 7` in the paper and opened at the end of  the script.
 
 ### Experiment 3
 
@@ -145,7 +176,7 @@ Later data points up to a chain length of 10 as well as a chain length of 50 are
 Those results are automatically collected and combined for the final plot. 
 The combined results will be saved to the folder `output/experiment3/`. 
 CSV-files for each evaluated chain length are stored in the subfolder `/data`. The generated plots are stored in the
-subfolder `/plots`. The plot named `output/experiment3/combined/plots/AnalysisTimeComp.pdf` is shown as `Fig. 8` in the paper.
+subfolder `/plots`. The plot named `output/experiment3/combined/plots/AnalysisTimeComp.pdf` is shown as `Fig. 8` in the paper and opened at the end of  the script.
 
 ### Experiment 4
 
@@ -168,9 +199,10 @@ The results will be saved to the folder `output/experiment4`.
 For each evaluated value of `k`, a subfolder is created named `/kx`, where `x` stands for the value of `k` that is used in the experiment. 
 The same structure as in the other experiments is found within those folders, i.e. a `/data` folder for the
 CSV-files and a `/plots` folder for individual plots. 
-The final plot combines all sub-experiments and is stored in `output/experiment4/plots`, where the plot named `NormalizedLatency.pdf` is shown as Fig. 7 in the paper.
+The final plot combines all sub-experiments and is stored in `output/experiment4/plots`, where the plot named `MeanLatencyComp.pdf`. 
+The plot is opened at the end of the script.
 
-## Executing Experiment/Configurations Manually
+## Executing Configurations Manually
 
 The python code provides the means to collect data for one configuration with varying number of tasks in a chain. 
 Those results are saved in the folder `output` in the structure shown above. 

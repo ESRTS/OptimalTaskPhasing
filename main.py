@@ -507,6 +507,10 @@ def main():
         if automotivePeriods is False:
             if args.kValue is not None: 
                 k = args.kValue      # k-value of (2,k)-max harmonic periods
+
+                if k % 2 == 0:
+                    print("k cannot be divisible by 2.")
+                    return
             else:
                 k = None             # We use this to indicate that we generate max-harmonic periods
             
