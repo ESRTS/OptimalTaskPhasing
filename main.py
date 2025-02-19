@@ -400,7 +400,7 @@ def caseStudy(dstPath):
     print("|--------------------------------------------------------")
     print("| Runtime  Martinez\t| " + "{:.3f}".format(harmonicRuntimeMartinez) + " ms\t| " + "{:.3f} ms".format(semiHarmonicRuntimeMartinez) + "\t|")
     print("|--------------------------------------------------------")
-    print("| Runtime Ours\t\t| " + "{:.3f}".format(harmonicRuntimeOurs) + " ms\t| " + "{:.3f} ms".format(semiHarmonicRuntimeMartinez) + "\t|")
+    print("| Runtime Ours\t\t| " + "{:.3f}".format(harmonicRuntimeOurs) + " ms\t| " + "{:.3f} ms".format(semiHarmonicRuntimeOurs) + "\t|")
     print("|--------------------------------------------------------")
 
 def storeExperimentConfig(args):
