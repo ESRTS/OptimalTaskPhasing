@@ -278,9 +278,8 @@ def getMinImprovementForChainLength(dataFolder, length) :
 
 def plot(dataFolder, dstFolder, start, stop, step):
     """ Create plotw for the files in the dataFolder. """
-    expName = dataFolder.split('/')[-1]
     
-    print("Generating Plots for data " + expName)
+    print("Generating Plots for folder: " + dataFolder)
 
     data = []
     gap = False
@@ -482,7 +481,7 @@ def combineResults(destinationFolder, input) :
         for fileName in allfiles:
             srcFilePath = os.path.join(sourceDataPath, fileName)
             dstFilePath = os.path.join(dataPath, fileName)
-            print(srcFilePath + " -> " + dstFilePath) 
+            #print(srcFilePath + " -> " + dstFilePath) 
 
             srcFile = open(srcFilePath, "r")
             dstFile = open(dstFilePath, "a")

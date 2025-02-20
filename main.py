@@ -1,3 +1,22 @@
+"""
+Evaluation of the paper "Optimal Task Phasing for End-To-End Latency in
+Harmonic and Semi-Harmonic Automotive Systems".
+
+This is the main file to start the evaluation. For configurations that evaluate synthetic 
+chains, one thread is started for each evaluated chain length. 
+Each individual chain is analyzed by several appraoches / in several configurations:
+- DPT Analysis, exact analysis of LET chains by Becker et al. JSA 2017, with offsets
+- The proposed optimal task phasing and analysis (for max harmonic and (2,k)-max harmonic systems)
+- DPT Analysis with the phase configuration of our proposed approach
+- Exact analysis by Martinez et al. TCAD'18 with our proposed optimal phasing
+- Latency bound by Davare et al. DAC'07
+- Random phase configuration analyzed by the DPT analysis
+- Computation of the number of configurations the offset heuristic by Martinez et al. TCAD'18 explores
+- Offset heuristic by Martinez et al. TCAD'18
+
+The implementation includes assertions to trigger in cases that would violate the theoretical results
+(i.e. the latency with our proposed optimal phasing is different to the exhaustive heuristic by Martinez et al., etc.)
+"""
 from Time import *
 from Task import hyperperiod
 from DPT_Offset import *
@@ -16,8 +35,9 @@ from multiprocessing import Pool, Manager
 import threading
 
 def runConfiguration(seed, length, basePath, expCount, onlyMaxHarmonic, runHeuristic, timeout, expPerDot, q, automotivePeriods, k, numPeriods):
-    """ This is executed as thread and handles all experiments for one chain length. 
-        Output is written to a dedicated CSV-file, and update information is sent to the logger thread.
+    """ 
+    This function is executed as thread and handles all experiments for one chain length. 
+    Output is written to a dedicated CSV-file, and update information is sent to the logger thread.
     """
     random.seed(seed)   # For reproducability we use the seed here for each chain length
 
@@ -130,6 +150,9 @@ def runConfiguration(seed, length, basePath, expCount, onlyMaxHarmonic, runHeuri
                         heuristicLatency = heuristicOptimalPhasingTimeout(chain, mseconds(1), timeout)
                         if heuristicLatency > 0:    # -1 is returned in case of a timeout
                             heuristicLatency = heuristicLatency / hp
+                            
+                            # Make sure that the offset heuristic latency is the same as our optimal latency
+                            assert optPhasingLatency == heuristicLatency, chainString(chain) + " Optimal Phasing Latency: " + printTime(optPhasingLatency) + " Offset Heuristic Latency: " + printTime(heuristicLatency)                            
                     else:
                         heuristicLatency = heuristicOptimalPhasing(chain, mseconds(1)) / hp
                     durOffsetHeuristic = timer() - startOffsetHeuristic
@@ -148,9 +171,6 @@ def runConfiguration(seed, length, basePath, expCount, onlyMaxHarmonic, runHeuri
 
                 # Make sure that the latency we compute with the proposed phasing is always equal to the exact analysis
                 assert optPhasingLatency == offsetLatency, chainString(chain) + " Optimal Phasing Latency: " + printTime(optPhasingLatency) + " Offset Latency: " + printTime(offsetLatency)
-
-                # Make sure that the offset heuristic latency is the same as our optimal latency
-                #assert optPhasingLatency == heuristicLatency, chainString(chain) + " Optimal Phasing Latency: " + printTime(optPhasingLatency) + " Offset Heuristic Latency: " + printTime(heuristicLatency)
 
                 ratio = optPhasingLatency / synchronousLatency 
                 if ratio < bestRatio:
@@ -441,7 +461,7 @@ def main():
     parser.add_argument("-ap", "--automotivePeriods", help="Set flag to run the experiment with automotive periods.", action="store_true")
 
     parser.add_argument("-heur","--heuristic", help="Set to true to enable the offset heuristic of Martinez et al. TCAD'18 (long runtime).", action="store_true")
-    parser.add_argument("-to","--timeout", help="Timeout for the heuristic.", type=int)
+    parser.add_argument("-to","--timeout", help="Timeout for the heuristic. (!!!Experimental, aborted threads don't clean up properly which can lead to memory problems!!!)", type=int)
     parser.add_argument("-min","--minlength", help="Minimum length of generated chains.", type=int)
     parser.add_argument("-max","--maxlength", help="Maximum length of generated chains.", type=int)
     parser.add_argument("-inc","--incrementlength", help="Step between two examined chain length.", type=int)

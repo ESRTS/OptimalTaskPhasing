@@ -19,7 +19,7 @@ The evaluations shown in the paper are performed on a platform containing an Int
 Experiments that include the heuristic to explore all unique offset combinations can exceed the available memory in rare cases.
 
 The results can be replecated with smaller platforms as well, at the cost of longer runtime. 
-The virtual machine, a configuration of 5 CPUs and 4 GB RAM offers a good tradeoff.
+For the virtual machine, a configuration of 5 CPUs and 10 GB RAM offers a good tradeoff.
 
 
 ## Setup and Installation
@@ -85,16 +85,13 @@ pip install -r requirements.txt
     |      |  ├──length_2.csv                   # All results for a chain length of 2
     |      |  ├──...
     |      |  └──length_10.csv                  # All results for a chain length of 2
-    |      ├──plots                             # The folder includes all generated plots for this configuration
-    |      |  ├──AnalysisTimeComp.pdf
-    |      |  ├──AvrgLatencyComp.pdf
-    |      |  ├──HeuristicCombinations.pdf
-    |      |  ├──LatencyComp.pdf
-    |      |  ├──NormalizedLatency.pdf
-    |      |  └──length_10.csv
-    |      └──experiment_settings.csv
+    |      ├──plots                             # The folder includes all basic generated plots for this configuration
+    |      |  ├──AnalysisTimeComp.pdf           # Boxplot comparing analysis runtimes
+    |      |  ├──LatencyComp.pdf                # Boxplot comparing latency bound of different approaches
+    |      |  └──NormalizedLatency.pdf          # Boxplot optimal latency / latency with synchronous release
+    |      └──experiment_settings.csv           # Summary of configuration used for this experiment run
     ├──Comparison.py                            # Methods for general comparison (Davare bound and random phasing)
-    ├──DPT_Offset.py                            # Exact analyis for LET chains with offset Becker JSA 2017
+    ├──DPT_Offset.py                            # Exact analyis for LET chains Becker et al. JSA 2017 with offset 
     ├──main.py                                  # Methods to parse arguments and parallelize execution of different chain lengths
     ├──MartinezTCAD18.py                        # Exact analysis for LET chains and heuristic offset assignment from Martinez et al. TCAD 2018
     ├──OptimalPhasing.py                        # Proposed approach for optimal task phasing 
@@ -113,14 +110,14 @@ The shepherding process is ongoing.
 The mapping of experiment to paper element, as well as the expected runtimes with the virtual machine, is shown in the table below.
 For pots in the paper, 1000 random chains are evaluated for each data point.
 This can be very timeconsuming and a reduced number of samples can be used instead (e.g. 50).
-If a smaller number of samples per data point are used, the curves look more uneven but the general trends and observations are visible.
+If a smaller number of samples per data point are used, the curves can look more uneven but the general trends and observations from the plots in the paper are visible.
 
-| Name          | Paper       | Runtime 50  | Runtime 1000    |
-|---------------|-------------|-------------|-----------------|
-| [Experiment 1](#experiment-1)  | Table 1     | < 5 s (no sample count needed)|
-| [Experiment 2](#experiment-2)  | Figure 7    | ~30 min      | 10h            |
-| [Experiment 3](#experiment-3)  | Figure 8    |  min         | h              |
-| [Experiment 4](#experiment-4)  | Shepherding |  min         | h              |
+| Name                           | Paper       | Runtime 50      | Runtime 1000 |
+|--------------------------------|-------------|-----------------|--------------|
+| [Experiment 1](#experiment-1)  | Table 1     | < 5 s (no sample count needed) |
+| [Experiment 2](#experiment-2)  | Figure 7    | ~30 min         | ~10h         |
+| [Experiment 3](#experiment-3)  | Figure 8    | ~35 min         | ~11.5h       |
+| [Experiment 4](#experiment-4)  | Shepherding |  min            | h            |
 
 
 To reproduce the experiments of the paper, dedicated scripts are provided. Where applicable, the number of evaluated task chains per configuration can be configured as argument, allowing to generate results with less data points in reduced runtime. 

@@ -1,3 +1,10 @@
+"""
+This file implements a class to represent a task, as well as functionality top generate 
+random tasks and chains based on different settings.
+
+
+"""
+
 from Time import *
 from drs import drs
 import random
@@ -179,6 +186,7 @@ def hyperperiod(tasks):
     return math.lcm(*periods)
 
 def chainString(chain):
+    """ Helper to get a string representing the task chain. """
     retval = printTime(chain[0].period) + "/" + printTime(chain[0].offset)
 
     for task in chain[1:]:
@@ -187,9 +195,7 @@ def chainString(chain):
     return retval
 
 def generatePeriodSet(k, numPeriods, maxAllowedPeriod):
-    '''
-    Generates (2,k)-max harminc period sets with configurable number of periods and a bound on the maximum allowed period. 
-    '''
+    """ Generates (2,k)-max harminc period sets with configurable number of periods and a bound on the maximum allowed period."""
     periodSets = []
 
     # Compute all T^E_{max,2} candidates.
@@ -218,18 +224,13 @@ def generatePeriodSet(k, numPeriods, maxAllowedPeriod):
     return set
 
 def getTmax2(k, tmax1):
-    '''
-    Computes T^E_{max,2} based on a given value of k and T^E_{max,1}.
-    If the value is not an integer, None is returned.
-    '''
+    """ Computes T^E_{max,2} based on a given value of k and T^E_{max,1}. If the value is not an integer, None is returned. """
     if (2 * int(tmax1)) % int(k) == 0:
         return int((2 * int(tmax1)) / int(k))
     return None
 
 def is2kMaxHarmonic(tasks):
-    '''
-    Test if a set of periods is (2,k)-max harmonic.
-    '''
+    """ Test if a set of periods is (2,k)-max harmonic. """
 
     periods = []
 
@@ -257,11 +258,11 @@ def is2kMaxHarmonic(tasks):
     return True
 
 def generateMaxHarmonicPeriodSet(numPeriods, maxAllowedPeriod):
-    '''
+    """
     Function generates a random period set with at least numPeriods periods. The maximum allowed period is 
     maxAllowedPeriod. During the generation, all possible period sets are generates that have 
     a length of at least numPeriods. From those the final periods will be selected.
-    '''
+    """
     allSets = []
     for i in range(1,maxAllowedPeriod+1):
         tmpSet = []

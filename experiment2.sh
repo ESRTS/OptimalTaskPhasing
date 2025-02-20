@@ -3,7 +3,7 @@
 # Specify the number of samples per configuration
 if [ $# -eq 0 ]
 then
-  echo "Specify the number of samples per configuration (e.g. './experiment2.sh 1000' )."
+  echo "Specify the number of samples per configuration (e.g. './experiment2.sh 1000')."
   exit 1
 else
   SAMPLES=$1
