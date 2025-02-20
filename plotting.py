@@ -597,5 +597,6 @@ if __name__ == '__main__':
             exit(1)
 
         combineResults(destinationFolder, input)
-
+    else:
+        print("Unknown plotting type: " + str(type))
     

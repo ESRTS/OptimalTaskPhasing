@@ -23,13 +23,16 @@ python3 main.py experiment4/k3 --synthetic --cores $CORES --minlength 2 --maxlen
 python3 main.py experiment4/k5 --synthetic --cores $CORES --minlength 2 --maxlength 50 --incrementlength 2 --experimentCount $SAMPLES --kValue 5 --numPeriods $NUM_PERIODS --seed 123
 python3 main.py experiment4/k7 --synthetic --cores $CORES --minlength 2 --maxlength 50 --incrementlength 2 --experimentCount $SAMPLES --kValue 7 --numPeriods $NUM_PERIODS --seed 123
 python3 main.py experiment4/k9 --synthetic --cores $CORES --minlength 2 --maxlength 50 --incrementlength 2 --experimentCount $SAMPLES --kValue 9 --numPeriods $NUM_PERIODS --seed 123
+#python3 main.py experiment4/k11 --synthetic --cores $CORES --minlength 2 --maxlength 50 --incrementlength 2 --experimentCount $SAMPLES --kValue 11 --numPeriods $NUM_PERIODS --seed 123
+#python3 main.py experiment4/k13 --synthetic --cores $CORES --minlength 2 --maxlength 50 --incrementlength 2 --experimentCount $SAMPLES --kValue 13 --numPeriods $NUM_PERIODS --seed 123
+python3 main.py experiment4/max --synthetic --cores $CORES --minlength 2 --maxlength 50 --incrementlength 2 --experimentCount $SAMPLES --numPeriods $NUM_PERIODS --seed 123
 
 ###
 # Call the plotting explicitly with the configuration to collect all data recorded above. 
 ###
-python3 plotting.py experiment4 --minlength 2 --maxlength 50 --incrementlength 2 --kValue "3,5,7,9" --source "experiment4/k3,experiment4/k5,experiment4/k7,experiment4/k9"
+python3 plotting.py experiment4 --type 2KMAX --minlength 2 --maxlength 50 --incrementlength 2 --kValue "3,5,7,9,max" --source "experiment4/k3,experiment4/k5,experiment4/k7,experiment4/k9,experiment4/max"
 
 ###
 # Open the plot that is used for the new experiment (currently being added during shepherding).
 ###
-open output/experiment4/plots/AvrgLatencyComp.pdf &
+open output/experiment4/plots/MeanLatencyComp.pdf &

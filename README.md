@@ -1,10 +1,26 @@
 # Optimal Task Phasing for End-To-End Latency in Harmonic and Semi-Harmonic Automotive Systems
 
-This repository is used to reproduce the evaluation of the paper:
+This document describes the steps to reproduce the evaluation of the paper:
 
-<i>Optimal Task Phasing for End-To-End Latency in Harmonic and Semi-Harmonic Automotive Systems</i>
+<i>Optimal Task Phasing for End-To-End Latency in Harmonic and Semi-Harmonic Automotive Systems</i>\
+<i>Mario Günzel, Matthias Becker</i>
 
 The paper is under submission at RTAS 2025.
+
+This document is structured as follows:
+* [Platform Requirements](#platform-requirements)
+* [Setup and Installation](#setup-and-installation)
+* [Reproducing Experiments ](#reproducing-experiments)
+* [Executing Configurations Manually](#executing-configurations-manually)
+
+## Platform Requirements
+
+The evaluations shown in the paper are performed on a platform containing an Intel Xeon Silver 4114 processor with 10 cores (20 threads) at 2.2 GHz and 32 GB RAM, running Linux. 
+Experiments that include the heuristic to explore all unique offset combinations can exceed the available memory in rare cases.
+
+The results can be replecated with smaller platforms as well, at the cost of longer runtime. 
+The virtual machine, a configuration of 5 CPUs and 4 GB RAM offers a good tradeoff.
+
 
 ## Setup and Installation
 
@@ -22,7 +38,7 @@ The VM is based on an image obtained from [osboxes.org](www.osboxes.org).
 * **Password:** osboxes.org
 
 The source code is deployed on the desktop and all required software is installed. 
-To move to the folder and activate the prepared virtual environment, the following commands are exected:
+To move to the folder and activate the prepared virtual environment, the following commands are executed:
 
 ```
 cd Desktop/OptimalTaskPhasing
@@ -33,9 +49,9 @@ Afterwards, the steps described below to [reproduce the experiment](#reproducing
 
 ### Installing Manually
 As a prerequisite, the following should be installed on the platform:
-* Python 3
+* Python 3.10.12 or 3.12.7 (other versions might work as well)
 * Git
-* Latex (for plots)
+* Latex (for plots using matplotlib)
 
 Clone the git repository:
 ```
@@ -60,7 +76,7 @@ Finally, the requirements can be installed to the virtual environment:
 pip install -r requirements.txt
 ```
 
-## File Structure
+### File Structure
 
     .
     ├── output                                  # The folder includes all generated output 
@@ -83,8 +99,8 @@ pip install -r requirements.txt
     ├──MartinezTCAD18.py                        # Exact analysis for LET chains and heuristic offset assignment from Martinez et al. TCAD 2018
     ├──OptimalPhasing.py                        # Proposed approach for optimal task phasing 
     ├──plotting.py                              # Methods to plot the different results
-    ├──README.md
-    ├──requirements.txt
+    ├──README.md                                # Instructions for the artifact
+    ├──requirements.txt                         # Required packages and versions
     ├──Task.py                                  # Task and task chains, as well as methods to generate random tasks for different settings
     └──Time.py                                  # Helper methods to handle timestamps
 
@@ -94,10 +110,10 @@ The paper includes four experiments.
 Note that experiment four is a new experiment added during
 shepherding. 
 The shepherding process is ongoing.
-The mapping of experiment to paper element is as follows.
-The table also shows expected runtimes with the virtual machine. 
+The mapping of experiment to paper element, as well as the expected runtimes with the virtual machine, is shown in the table below.
 For pots in the paper, 1000 random chains are evaluated for each data point.
-This can be very timeconsuming and a reduced number of samples can be used instead.  
+This can be very timeconsuming and a reduced number of samples can be used instead (e.g. 50).
+If a smaller number of samples per data point are used, the curves look more uneven but the general trends and observations are visible.
 
 | Name          | Paper       | Runtime 50  | Runtime 1000    |
 |---------------|-------------|-------------|-----------------|
