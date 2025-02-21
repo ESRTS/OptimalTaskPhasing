@@ -17,6 +17,9 @@ else
   fi
 fi
 
+# Record the time this experiment is started
+STARTTIME=$(date +%s)
+
 # Set the number of threads/cores that are used for the experiment.
 CORES=4
 
@@ -56,3 +59,7 @@ python3 plotting.py experiment3 --type NORMAL --minlength 2 --maxlength 50 --inc
 # Open the plot that is used for Figure 8.
 ###
 open output/experiment3/plots/AnalysisTimeComp.pdf &
+
+# Record the time this experiment is finished and print the runtime
+ENDTIME=$(date +%s)
+echo "\r\nIt takes $(($ENDTIME - $STARTTIME)) seconds to complete experiment 3 with $SAMPLES samples for each configuration."

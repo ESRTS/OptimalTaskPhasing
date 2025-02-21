@@ -189,7 +189,7 @@ def runConfiguration(seed, length, basePath, expCount, onlyMaxHarmonic, runHeuri
                            + str(numAssignments) + ',' + str(maxHarmonic) + '\n')
                     
         file.close()
-        q.put([length, " -> Best: " + "{:.4f}".format(bestRatio) + " Worst: " + "{:.4f}".format(worstRatio)])
+        q.put([length, " -> Finished"])
 
 def logger_thread(q, start, stop, step):
     """ This is the logger thread that collects the update information from each experiment thread to 

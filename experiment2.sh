@@ -10,6 +10,9 @@ else
   echo "Collecting $SAMPLES samples for each configuration."
 fi
 
+# Record the time this experiment is started
+STARTTIME=$(date +%s)
+
 # Set the number of threads/cores that are used for the experiment.
 CORES=4
 
@@ -22,3 +25,7 @@ python3 main.py experiment2 --synthetic --cores "$CORES" --automotivePeriods --m
 # Open the plot that is used for Figure 7.
 ###
 open output/experiment2/plots/NormalizedLatency.pdf &
+
+# Record the time this experiment is finished and print the runtime
+ENDTIME=$(date +%s)
+echo "\r\nIt takes $(($ENDTIME - $STARTTIME)) seconds to complete experiment 2 with $SAMPLES samples for each configuration."
