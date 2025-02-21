@@ -40,3 +40,4 @@ open output/experiment4/plots/MeanLatencyComp.pdf &
 # Record the time this experiment is finished and print the runtime
 ENDTIME=$(date +%s)
 echo "\r\nIt takes $(($ENDTIME - $STARTTIME)) seconds to complete experiment 3 with $SAMPLES samples for each configuration."
+echo "output/experiment4/plots/MeanLatencyComp.pdf corresponds to Fig. 9 in the paper."

@@ -63,3 +63,4 @@ open output/experiment3/plots/AnalysisTimeComp.pdf &
 # Record the time this experiment is finished and print the runtime
 ENDTIME=$(date +%s)
 echo "\r\nIt takes $(($ENDTIME - $STARTTIME)) seconds to complete experiment 3 with $SAMPLES samples for each configuration."
+echo "output/experiment3/plots/AnalysisTimeComp.pdf corresponds to Fig. 8 in the paper."
