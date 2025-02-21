@@ -87,25 +87,25 @@ pip install -r requirements.txt
 
     .
     ├── output                          # The folder includes all generated output 
-    |   ├──example_run                  # Structure of generated output for one execution (not in repository)
-    |      ├──data                      # Results of the experiment run (here assuming a varying chain length from 2 to 10)
+    |   ├──example_run                  # Example experiment result
+    |      ├──data                      # CSV-file for each chain length
     |      |  ├──length_2.csv           # All results for a chain length of 2
     |      |  ├──...
-    |      |  └──length_10.csv          # All results for a chain length of 2
-    |      ├──plots                     # The folder includes all basic generated plots for this configuration
-    |      |  ├──AnalysisTimeComp.pdf   # Boxplot comparing analysis runtimes
-    |      |  ├──LatencyComp.pdf        # Boxplot comparing latency bound of different approaches
-    |      |  └──NormalizedLatency.pdf  # Boxplot optimal latency / latency with synchronous release
-    |      └──experiment_settings.csv   # Summary of configuration used for this experiment run
-    ├──Comparison.py                    # Methods for general comparison (Davare bound and random phasing)
-    ├──DPT_Offset.py                    # Exact analyis for LET chains Becker et al. JSA 2017 with offset 
-    ├──main.py                          # Methods to parse arguments and parallelize execution of different chain lengths
-    ├──MartinezTCAD18.py                # Analysis and heuristic offset assignment for LET chains by Martinez et al. TCAD 2018
+    |      |  └──length_10.csv          # All results for a chain length of 10
+    |      ├──plots                     # Generated plots
+    |      |  ├──AnalysisTimeComp.pdf   # Boxplot analysis runtimes
+    |      |  ├──LatencyComp.pdf        # Boxplot latency bound of different approaches
+    |      |  └──NormalizedLatency.pdf  # Boxplot optimal / synchronous release
+    |      └──experiment_settings.csv   # Configuration used for this experiment run
+    ├──Comparison.py                    # Davare bound and random phasing
+    ├──DPT_Offset.py                    # Analysis Becker et al. JSA 2017 with offset 
+    ├──main.py                          # Experiment orchestration
+    ├──MartinezTCAD18.py                # Analysis and heuristic by Martinez et al. TCAD 2018
     ├──OptimalPhasing.py                # Proposed approach for optimal task phasing 
     ├──plotting.py                      # Methods to plot the different results
     ├──README.md                        # Instructions for the artifact
     ├──requirements.txt                 # Required packages and versions
-    ├──Task.py                          # Task, task chains, as well as methods to generate random tasks for different settings
+    ├──Task.py                          # Task, task chains, and random chain generation
     └──Time.py                          # Helper methods to handle timestamps
 
 ## Reproducing Experiments 
