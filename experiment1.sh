@@ -10,4 +10,4 @@ python3 main.py experiment1 --casestudy
 
 # Record the time this experiment is finished and print the runtime
 ENDTIME=$(date +%s)
-echo "\r\nIt takes $(($ENDTIME - $STARTTIME)) seconds to complete experiment 1."
+echo "It takes $(($ENDTIME - $STARTTIME)) seconds to complete experiment 1."

@@ -28,5 +28,5 @@ open output/experiment2/plots/NormalizedLatency.pdf &
 
 # Record the time this experiment is finished and print the runtime
 ENDTIME=$(date +%s)
-echo "\r\nIt takes $(($ENDTIME - $STARTTIME)) seconds to complete experiment 2 with $SAMPLES samples for each configuration."
+echo "It takes $(($ENDTIME - $STARTTIME)) seconds to complete experiment 2 with $SAMPLES samples for each configuration."
 echo "output/experiment2/plots/NormalizedLatency.pdf corresponds to Fig. 7 in the paper."
