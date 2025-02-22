@@ -435,7 +435,7 @@ def gen2kmaxPlot(dstPath, sourcePaths, minChainLength, maxChainLength, stepChain
             graphData.append(['(2,'+str(kValueItems[i])+')-max harmonic', avrgOpt, length])
 
 
-    print(graphData)
+    #print(graphData)
     df = pd.DataFrame(graphData, columns=['Approach', 'Optimal / Synchronous', 'Cause-Effect Chain Length'])
 
     configure_mpl_for_tex()

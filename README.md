@@ -355,4 +355,4 @@ python3 plotting.py folder --type 2KMAX --minlength 2 --maxlength 50 --increment
 
 ### License 
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License - see the [LICENSE](https://github.com/ESRTS/OptimalTaskPhasing/blob/main/README.md)) file for details.
