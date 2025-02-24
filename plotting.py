@@ -432,14 +432,14 @@ def gen2kmaxPlot(dstPath, sourcePaths, minChainLength, maxChainLength, stepChain
                     opt.append(float((row[3])) / float((row[1])))
             avrgOpt = geo_mean(opt)
 
-            graphData.append(['(2,'+str(kValueItems[i])+')-max harmonic', avrgOpt, length])
+            graphData.append(['(2,'+str(kValueItems[i])+')-max-harmonic', avrgOpt, length])
 
 
     #print(graphData)
     df = pd.DataFrame(graphData, columns=['Approach', 'Optimal / Synchronous', 'Cause-Effect Chain Length'])
 
     configure_mpl_for_tex()
-    g = sns.lineplot(data = df, x = 'Cause-Effect Chain Length', y = 'Optimal / Synchronous', hue='Approach', palette='Set2')
+    g = sns.lineplot(data = df, x = 'Cause-Effect Chain Length', y = 'Optimal / Synchronous', hue='Approach', style='Approach', palette='Set2', markers=['.', 'P','^','o'], markersize=6)
 
     g.legend_.set_title(None)
 
