@@ -378,6 +378,7 @@ python3 plotting.py folder --type 2KMAX --minlength 2 --maxlength 50 --increment
 
 `--source:`: A comma separate string (no space) that lists all source folders for the individual results of each `k` value (in the same order as in `--kValues`.) Each of those folders is assumed to located in `output/`.
 
+<!--
 ## Miscellaneous
 
 ### Contributors
@@ -388,3 +389,4 @@ python3 plotting.py folder --type 2KMAX --minlength 2 --maxlength 50 --increment
 ### License 
 
 This project is licensed under the MIT License - see the [LICENSE](https://github.com/ESRTS/OptimalTaskPhasing/blob/main/README.md)) file for details.
+-->
