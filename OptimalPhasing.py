@@ -1,12 +1,12 @@
-##################################################################################
-# Optimal task phasing for single chains.
-#
-# - Optimal task phasing to minimize end-to-end latency for max-harmonic 
-#   and semi-harmonic automotive periods
-# - Computation of end-to-end latency bound under phasing
-# 
-# Author: Matthias Becker
-##################################################################################
+""" 
+This file implements the proposed optimal task phasing for single chains.
+- Optimal task phasing to minimize end-to-end latency for max-harmonic 
+- Optimal task phasing to minimize end-to-end latency with (2,k)-max-harmonic periods
+- Computation of end-to-end latency bound under both phasings
+
+* optimalPhasingMaxHarm(chain)      -> max-harmonic periods
+* optimalPhasing2kMaxHarm(chain)    -> (2,k)-max-harmonic periods
+"""
 from Time import *
 from Task import *
 import os
@@ -35,8 +35,8 @@ def optimalPhasingMaxHarm(chain):
 
     return latencyBound
 
-def optimalPhasingSemiHarm(chain):
-    """ Function assigns optimal task phasing for semi harmonic automotive periods 
+def optimalPhasing2kMaxHarm(chain):
+    """ Function assigns optimal task phasing for (2,k)-max-harmonic periods 
         to minimize the end-to-end latency and returns the latency bound. 
     """
 
@@ -44,12 +44,10 @@ def optimalPhasingSemiHarm(chain):
     max2Period = getMax2Period(chain)   # Get the secod largest period
 
     if is2kMaxHarmonic(chain) == False:
-    #if not((max1Period == mseconds(5) and max2Period == mseconds(2)) or (max1Period == mseconds(50) and max2Period == mseconds(20))):
         print("max1Period: " + printTime(max1Period))
         print("max2Period: " + printTime(max2Period))
 
     assert is2kMaxHarmonic(chain)
-  #  assert (max1Period == mseconds(5) and max2Period == mseconds(2)) or (max1Period == mseconds(50) and max2Period == mseconds(20)) # Make sure the chain has semi harmonic automotive periods!
     
     # Compute tasks where periods switch between max1 and max2
     nu = getPeriodSwitches(chain) 
@@ -150,7 +148,7 @@ if __name__ == '__main__':
 
     # chain = [task1, task2, task3, task4]
 
-    # latencyBound = optimalPhasingSemiHarm(chain)
+    # latencyBound = optimalPhasing2kMaxHarm(chain)
 
     # print("Max Data Age = %s" % (printTime(latencyBound)))
 
@@ -166,7 +164,7 @@ if __name__ == '__main__':
 
     # print(chainString(chain))
 
-    # latencyBound = optimalPhasingSemiHarm(chain)
+    # latencyBound = optimalPhasing2kMaxHarm(chain)
 
     # assert latencyBound == mseconds(155) # Check that the result is correct
 
@@ -186,7 +184,7 @@ if __name__ == '__main__':
 
     # print(chainString(chain))
     
-    # latencyBound = optimalPhasingSemiHarm(chain)
+    # latencyBound = optimalPhasing2kMaxHarm(chain)
 
     # print("Offset:")
     # prev = 0
@@ -214,7 +212,7 @@ if __name__ == '__main__':
     if is2kMaxHarmonic(chain) is not True:
         print(":NOT MAX-HARMONIC!")
 
-    latencyBound = optimalPhasingSemiHarm(chain)
+    latencyBound = optimalPhasing2kMaxHarm(chain)
     print("\nLatency Bound: " + printTime(latencyBound))
 
     dpt = DPT(chain)

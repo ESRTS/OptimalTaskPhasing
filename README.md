@@ -1,11 +1,10 @@
-# Optimal Task Phasing for End-To-End Latency in Harmonic and Semi-Harmonic Automotive Systems
+# Artifact: Optimal Task Phasing for End-To-End Latency in Harmonic and Semi-Harmonic Automotive Systems
 
 This document describes the steps to reproduce the evaluation of the paper:
 
-<b><i>Optimal Task Phasing for End-To-End Latency in Harmonic and Semi-Harmonic Automotive Systems</i>\
-<i>Mario Günzel, Matthias Becker</i></b>
+<b><i>Optimal Task Phasing for End-To-End Latency in Harmonic and Semi-Harmonic Automotive Systems</i></b>
 
-The paper is under submission at RTAS 2025.
+The paper is conditionally accepted at RTAS 2025 and currently undergoing shepherding.
 
 This document is structured as follows:
 * [Platform Requirements](#platform-requirements)
@@ -20,7 +19,7 @@ This document is structured as follows:
 The evaluations shown in the paper are performed on a platform containing an Intel Xeon Silver 4114 processor with 10 cores (20 threads) at 2.2 GHz and 32 GB RAM, running Linux. 
 Experiments that include the heuristic to explore all unique offset combinations can exceed the available memory in rare cases.
 
-The results can be replecated with smaller platforms as well, at the cost of longer runtime. 
+The results can be replicated with smaller platforms as well, at the cost of longer runtime. 
 For the virtual machine, a configuration of 5 CPUs and 10 GB RAM offers a good tradeoff.
 Expected runtimes of experiments with the virtual machine are reported [below](#reproducing-experiments). 
 
@@ -33,7 +32,7 @@ The setup for both cases is described below.
 
 ### Using the Virtual Machine Image
 
-A virtual machine image based on Ubuntu 24.10 is provided at the link: [VM download link]()
+A virtual machine image based on Ubuntu 24.10 is provided at the link: [VM download link](https://tu-dortmund.sciebo.de/s/zxbPbW6At0TftRf)
 
 The VM image was tested with Virtual Box Version 7.1.6 r167084 (Qt6.5.3).
 A description on how to import the image can be found [here](https://www.osboxes.org/guide/).
@@ -60,11 +59,19 @@ As a prerequisite, the following should be installed on the platform:
 * Git
 * Latex (for plots using matplotlib)
 
+Download the Artifact code [here](https://tu-dortmund.sciebo.de/s/6WQxdAMn0SNQ5jC/download?path=%2F&files=OptimalTaskPhasing.tar.gz).
+
+Unpack the archive:
+```
+tar -xvzf OptimalTaskPhasing.tar.gz
+```
+<!--
 Clone the git repository:
 ```
 git clone https://github.com/ESRTS/OptimalTaskPhasing 
 ```
-Change the directory to the repository:
+-->
+Change the directory to the folder:
 ```
 cd OptimalTaskPhasing 
 ```
@@ -222,6 +229,31 @@ The same structure as in the other experiments is found within those folders, i.
 CSV-files and a `/plots` folder for individual plots. 
 The final plot combines all sub-experiments and is stored in `output/experiment4/plots`, where the plot named `MeanLatencyComp.pdf` corresponds to Figure 9 in the paper. 
 The plot is opened at the end of the script.
+
+### Full Data with 1000 Chains per Configuration
+
+For experiment 2-4, we also provide the complete data of experiment runs with 1000 chains per configuration as part of the virtual machine image. 
+The results can be found in the folders:
+* `~/Desktop/OptimalTaskPhasing/output/experiment2_1000/data`
+* `~/Desktop/OptimalTaskPhasing/output/experiment3_1000/data`
+* `~/Desktop/OptimalTaskPhasing/output/experiment4_1000/data`
+
+Plots can be manually generated for each configuration. An explanation of the arguments is provided [below](#additional-functionality).
+For each command the assumption is that the current folder is `~/Desktop/OptimalTaskPhasing`.
+
+<b>Experiment 2:</b>
+```
+python3 plotting.py experiment2_1000 --type NORMAL --minlength 2 --maxlength 50 --incrementlength 2
+```
+<b>Experiment 3:</b>
+```
+python3 plotting.py experiment3_1000 --type NORMAL --minlength 2 --maxlength 50 --incrementlength 1
+```
+<b>Experiment 4:</b>
+```
+python3 plotting.py experiment4_1000 --type 2KMAX --minlength 2 --maxlength 50 --incrementlength 2 --kValue "3,9,15,21" --source "experiment4_1000/k3,experiment4_1000/k9,experiment4_1000/k15,experiment4_1000/k21"
+
+```
 
 ## Executing Configurations Manually
 

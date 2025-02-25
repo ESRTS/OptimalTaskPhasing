@@ -1,13 +1,14 @@
-##################################################################################
-# Implementation of the latency analysis of LET cause-effect chains with offset
-# of Martinez et al. 
-#
-# J. Martinez, I. Sañudo and M. Bertogna, "Analytical Characterization of End-to-End 
-# Communication Delays With Logical Execution Time," in IEEE Transactions on Computer-Aided 
-# Design of Integrated Circuits and Systems, vol. 37, no. 11, pp. 2244-2254, 2018.
-# 
-# Author: Matthias Becker
-##################################################################################
+"""
+Implementation of the latency analysis of LET cause-effect chains with offset
+of Martinez et al. 
+
+J. Martinez, I. Sañudo and M. Bertogna, "Analytical Characterization of End-to-End 
+Communication Delays With Logical Execution Time," in IEEE Transactions on Computer-Aided 
+Design of Integrated Circuits and Systems, vol. 37, no. 11, pp. 2244-2254, 2018.
+
+* Latency analysis: calculateLatencyMartinezTCAD18(chain)
+* Offset heuristic: heuristicOptimalPhasing(chain, offsetGranularity)
+"""
 from Time import *
 from Task import *
 from Comparison import davareBound

@@ -100,7 +100,7 @@ def runConfiguration(seed, length, basePath, expCount, onlyMaxHarmonic, runHeuri
                     durOpt = timer() - startOpt
                 else:
                     startOpt = timer()
-                    optPhasingLatency = optimalPhasingSemiHarm(chain) / hp
+                    optPhasingLatency = optimalPhasing2kMaxHarm(chain) / hp
                     durOpt = timer() - startOpt
 
                 #############################
@@ -391,7 +391,7 @@ def caseStudy(dstPath):
     task4 = Task('Task1', useconds(1), mseconds(50), mseconds(50), 0)
 
     start = timer()
-    opt = optimalPhasingSemiHarm(chain)
+    opt = optimalPhasing2kMaxHarm(chain)
     durationOptimal = timer() - start
 
     print("Optimal Latency = " + printTime(opt) + " in " + str(durationOptimal * 1000) + " ms")

@@ -1,9 +1,8 @@
-import math
-
 """ 
 Functions to define time values. The base time unit is 1us, but can be changed if needed. 
 Source: https://github.com/boschresearch/ros2_response_time_analysis/blob/master/case_study/move_base.py
 """
+import math
 
 """ Base period of the time in us. """
 timeBase = 1

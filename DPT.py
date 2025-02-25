@@ -1,12 +1,10 @@
-##################################################################################
-# This file implements the analysis of the paper:
-# Matthias Becker, Dakshina Dasari, Saad Mubeen, Moris Behnam, Thomas Nolte,
-# "Synthesizing job-level dependencies for automotive multi-rate effect chains", 
-# 22nd IEEE International Conference on Embedded and Real-Time Computing Systems 
-# and Applications (RTCSA)
-#
-# Author: Matthias Becker
-##################################################################################
+"""
+This file implements the analysis of the paper:
+Matthias Becker, Dakshina Dasari, Saad Mubeen, Moris Behnam, Thomas Nolte,
+"Synthesizing job-level dependencies for automotive multi-rate effect chains", 
+22nd IEEE International Conference on Embedded and Real-Time Computing Systems 
+and Applications (RTCSA)
+"""
 from Time import *
 from Task import *
 import networkx as nx

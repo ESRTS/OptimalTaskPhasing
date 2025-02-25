@@ -2,7 +2,10 @@
 This file implements a class to represent a task, as well as functionality top generate 
 random tasks and chains based on different settings.
 
-
+Random chain generation:
+* generateRandomTasks(...)            -> Random chains with automotive periods
+* generateRandomTasks2kMax(...)       -> Random chains with (2,k)-max-harmonic periods
+* generateRandomTasksMaxHarmonic(...) -> Random chains with max-harmonic periods
 """
 
 from Time import *

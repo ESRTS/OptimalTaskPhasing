@@ -1,8 +1,6 @@
-##################################################################################
-# Plotting functionality
-# 
-# Author: Matthias Becker
-##################################################################################
+"""
+This file implements all plotting functionality, as well as helper functions to combine mutltiple data sets for plotting.
+"""
 import seaborn as sns
 import pandas as pd
 import matplotlib as mpl
@@ -20,7 +18,7 @@ warnings.filterwarnings("ignore")  # Tick labels for some boxplots are arranges 
 def configure_mpl_for_tex():
     "Configures matplotlib for LaTeX embedding"
     # Inspired by https://jwalton.info/Embed-Publication-Matplotlib-Latex/
-    # Adjusted from the version of Tobias Blass
+    # Adjusted from the version of Tobias Blass: https://github.com/boschresearch/ros2_response_time_analysis/blob/master/case_study/move_base.py
 
     # Width of the IEEE template column, determined by \the\columnwidth
     width_pts = 252

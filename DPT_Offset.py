@@ -1,22 +1,20 @@
-##################################################################################
-# This file implements the analysis of the paper:
-# Matthias Becker, Dakshina Dasari, Saad Mubeen, Moris Behnam, Thomas Nolte,
-# "Synthesizing job-level dependencies for automotive multi-rate effect chains", 
-# 22nd IEEE International Conference on Embedded and Real-Time Computing Systems 
-# and Applications (RTCSA)
-#
-# In addition: 
-# - The data age is computed under consideration of the time the
-#   value is present at the end of the chain (i.e. before it gets overwritten).
-# - Offsets are accounted for.
-# - LET semantics are used for communication.
-# 
-# Assumptions: 
-# - Periodic tasks with implicit deadlines and offset.
-# - LET semantics for communication.
-# 
-# Author: Matthias Becker
-##################################################################################
+""" 
+This file implements the analysis of the paper:
+Matthias Becker, Dakshina Dasari, Saad Mubeen, Moris Behnam, Thomas Nolte,
+"Synthesizing job-level dependencies for automotive multi-rate effect chains", 
+22nd IEEE International Conference on Embedded and Real-Time Computing Systems 
+and Applications (RTCSA)
+
+In addition: 
+- The data age is computed under consideration of the time the
+  value is present at the end of the chain (i.e. before it gets overwritten).
+- Offsets are accounted for.
+- LET semantics are used for communication.
+ 
+Assumptions: 
+- Periodic tasks with implicit deadlines and offset.
+- LET semantics for communication.
+"""
 from Time import *
 from Task import *
 import networkx as nx
