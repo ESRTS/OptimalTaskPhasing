@@ -2,9 +2,11 @@
 
 This document describes the steps to reproduce the evaluation of the paper:
 
-<b><i>Optimal Task Phasing for End-To-End Latency in Harmonic and Semi-Harmonic Automotive Systems</i></b>
+<b>Mario Günzel, Matthias Becker. Optimal Task Phasing for End-To-End Latency in Harmonic and Semi-Harmonic Automotive Systems. <i>31th IEEE Real-Time and Embedded Technology and Applications Symposium</i>, 2025.</b>
 
-The paper is conditionally accepted at RTAS 2025 and currently undergoing shepherding.
+
+
+
 
 This document is structured as follows:
 * [Platform Requirements](#platform-requirements)
@@ -25,14 +27,20 @@ Expected runtimes of experiments with the virtual machine are reported [below](#
 
 
 ## Setup and Installation
-
+<!--
 The artifact can be used in two ways: (1) Using the pre-installed virtual machine image (recommended approach). (2) Manual installation on Linux or OSX
 (Windows not tested).\
 The setup for both cases is described below.
 
 ### Using the Virtual Machine Image
 
-A virtual machine image based on Ubuntu 24.10 is provided at the link: [VM download link](https://tu-dortmund.sciebo.de/s/zxbPbW6At0TftRf)
+A virtual machine image based on Ubuntu 24.10 is provided at the link: [VM download link (6.76GB)](https://kth-my.sharepoint.com/:u:/g/personal/mabecker_ug_kth_se/EZ_I3-NtHB1CjUUVlaJJ-ZkBXS1lqRytJz8Kiq0b2jnguA?e=YpBYox&download=1)
+
+Unpack the virtual machine drive:
+
+```
+tar -xvzf Artifact_OptimalTaskPhasing_vdi.tar.gz
+```
 
 The VM image was tested with Virtual Box Version 7.1.6 r167084 (Qt6.5.3).
 A description on how to import the image can be found [here](https://www.osboxes.org/guide/).
@@ -54,23 +62,24 @@ source .venv/bin/activate
 Afterwards, the steps described below to [reproduce the experiment](#reproducing-experiments) can be followed. 
 
 ### Installing Manually
+-->
 As a prerequisite, the following should be installed on the platform:
 * Python 3.10.12 or 3.12.7 (other versions might work as well)
 * Git
 * Latex (for plots using matplotlib)
 
-Download the Artifact code [here](https://tu-dortmund.sciebo.de/s/6WQxdAMn0SNQ5jC/download?path=%2F&files=OptimalTaskPhasing.tar.gz).
+<!-- Download the Artifact code [here](https://kth-my.sharepoint.com/:u:/g/personal/mabecker_ug_kth_se/ESxzEjiOb0ZGqPDjyeFms9QBw3GvAsKjnKQzVPiwWLqgnA?e=zGbVn2&download=1).
 
 Unpack the archive:
 ```
 tar -xvzf OptimalTaskPhasing.tar.gz
 ```
-<!--
+-->
 Clone the git repository:
 ```
 git clone https://github.com/ESRTS/OptimalTaskPhasing 
 ```
--->
+
 Change the directory to the folder:
 ```
 cd OptimalTaskPhasing 
@@ -130,7 +139,7 @@ The scripts to reproduce experiments 2-4 contain the variable `$CORES` to indica
 
 | Name                           | Paper       | Runtime 100      | Runtime 1000 |
 |--------------------------------|-------------|-----------------|--------------|
-| [Experiment 1](#experiment-1)  | Table 1     | ~2 s (no sample count needed) |
+| [Experiment 1](#experiment-1)  | Table 2     | ~2 s (no sample count needed) |
 | [Experiment 2](#experiment-2)  | Figure 7    | ~1 h         | ~10h         |
 | [Experiment 3](#experiment-3)  | Figure 8    | ~1 h          | ~10h       |
 | [Experiment 4](#experiment-4)  | Figure 9    | ~1.5h            | ~15h            |
@@ -151,7 +160,7 @@ This experiment evaluates an automotive use-case in two configurations. First, w
 periods and then with semi-harmonic periods. For each configuration, the end-to-end latency with
 synchronous release is compared to the end-to-end latency with optimal phasing. The runtime to
 obtain the optimal phasing is reported for the proposed approach and the State-of-the-Art exhaustive heuristic.
-Results are reported in `Table 1`.
+Results are reported in `Table 2`.
 
 Change the permission of the script to be executable, and execute experimet1.sh:
 ```
@@ -161,8 +170,8 @@ chmod 777 experiment1.sh
 
 The results will be printed to the terminal. 
 Detailed in formation on each case-study setting (harmonic and semi-harmonic periods) is printed to the terminal.
-This includes additional information not part of Table 1, such as the number of configurations checked by the heuristic etc. 
-At the end of the printout, `Table 1` is shown.
+This includes additional information not part of Table 2, such as the number of configurations checked by the heuristic etc. 
+At the end of the printout, `Table 2` is shown.
 
 ### Experiment 2
 
