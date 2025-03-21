@@ -22,8 +22,8 @@ The evaluations shown in the paper are performed on a platform containing an Int
 Experiments that include the heuristic to explore all unique offset combinations can exceed the available memory in rare cases.
 
 The results can be replicated with smaller platforms as well, at the cost of longer runtime. 
-For the virtual machine, a configuration of 5 CPUs and 10 GB RAM offers a good tradeoff.
-Expected runtimes of experiments with the virtual machine are reported [below](#reproducing-experiments). 
+<!--For the virtual machine, a configuration of 5 CPUs and 10 GB RAM offers a good tradeoff.-->
+Expected runtimes of experiments on a platform with 5 CPUs and 10GB RAM are reported [below](#reproducing-experiments). 
 
 
 ## Setup and Installation
@@ -127,15 +127,13 @@ pip install -r requirements.txt
 ## Reproducing Experiments 
 
 The paper includes four experiments.
-Note that experiment four is a new experiment added during
-shepherding. 
-The shepherding process is ongoing.
-The mapping of experiment to paper element, as well as the expected runtimes with the virtual machine, is shown in the table below.
+The mapping of experiment to paper element, as well as the expected runtimes on a platform with 5 CPUs and 10GB RAM, is shown in the table below.
 For pots in the paper, `1000` random chains are evaluated for each data point.
 This can be very timeconsuming and a reduced number of samples can be used instead (e.g. `100`).
 If a smaller number of samples per data point are used, the curves can look more uneven but demonstrates the same trends and observations as the full experiments reported in the paper.\
-For the expected runtime, the virtual machine is running on a OSX host with 2,3 GHz 8-Core Intel Core i9 processor and 32GB RAM. The virtual machine itself is configured to have 5 cores and 10GB RAM. Experiment 2-4 are performed with `100` evaluated chains for each data point. Reported runtime of the experiments in the virtual machine with `1000` evaluated chains per data point are estimates.\
+Experiment 2-4 are performed with `100` evaluated chains for each data point.\
 The scripts to reproduce experiments 2-4 contain the variable `$CORES` to indicate how many parallel threads are used for the experiment. This can be changed by editing the scripts and changing the value of `$CORES`. This is helpful to shorten the experiment time on platforms with more than 5 cores. All scripts are configured for the suggested size of the virtiual machine (i.e. 5 cores and 10GB RAM). 
+
 
 | Name                           | Paper       | Runtime 100      | Runtime 1000 |
 |--------------------------------|-------------|-----------------|--------------|
@@ -147,7 +145,7 @@ The scripts to reproduce experiments 2-4 contain the variable `$CORES` to indica
 
 To reproduce the experiments of the paper, dedicated scripts are provided. Where applicable, the number of evaluated task chains per configuration can be configured as argument, allowing to generate results with less data points in reduced runtime. 
 
-For each experiment, we assume the current folder is `Desktop/OptimalTaskPhasing` (assuming the repository was cloned on the desktop, as in the virtual machine image) and the virtual environment is active:
+For each experiment, we assume the current folder is `Desktop/OptimalTaskPhasing` (assuming the repository was cloned on the desktop) and the virtual environment is active:
 
 ```
 cd Desktop/OptimalTaskPhasing
@@ -239,6 +237,7 @@ CSV-files and a `/plots` folder for individual plots.
 The final plot combines all sub-experiments and is stored in `output/experiment4/plots`, where the plot named `MeanLatencyComp.pdf` corresponds to Figure 9 in the paper. 
 The plot is opened at the end of the script.
 
+<!--
 ### Full Data with 1000 Chains per Configuration
 
 For experiment 2-4, we also provide the complete data of experiment runs with 1000 chains per configuration as part of the virtual machine image. 
@@ -263,7 +262,7 @@ python3 plotting.py experiment3_1000 --type NORMAL --minlength 2 --maxlength 50 
 python3 plotting.py experiment4_1000 --type 2KMAX --minlength 2 --maxlength 50 --incrementlength 2 --kValue "3,9,15,21" --source "experiment4_1000/k3,experiment4_1000/k9,experiment4_1000/k15,experiment4_1000/k21"
 
 ```
-
+-->
 ## Executing Configurations Manually
 
 The python code provides the means to collect data for one configuration with varying number of tasks in a chain as well as the case study. 
@@ -387,7 +386,7 @@ python3 plotting.py folder --type 2KMAX --minlength 2 --maxlength 50 --increment
 
 `--source:`: A comma separate string (no space) that lists all source folders for the individual results of each `k` value (in the same order as in `--kValues`.) Each of those folders is assumed to located in `output/`.
 
-<!--
+
 ## Miscellaneous
 
 ### Contributors
@@ -398,4 +397,4 @@ python3 plotting.py folder --type 2KMAX --minlength 2 --maxlength 50 --increment
 ### License 
 
 This project is licensed under the MIT License - see the [LICENSE](https://github.com/ESRTS/OptimalTaskPhasing/blob/main/README.md)) file for details.
--->
+
